@@ -81,7 +81,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $this->user1 = user_load(1);
     // Update uid 1's name and password so we know it.
     $password = user_password();
-    require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
+    require_once BACKDROP_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
     $account = array(
       'name' => 'user1',
       'pass' => user_hash_password(trim($password)),
@@ -96,29 +96,29 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $this->user1->pass_raw = $password;
 
     // Rebuild content access permissions
-    $this->drupalLogin($this->user1);
-    $this->drupalPost('admin/reports/status/rebuild', array(), t('Rebuild permissions'));
+    $this->backdropLogin($this->user1);
+    $this->backdropPost('admin/reports/status/rebuild', array(), t('Rebuild permissions'));
 
     if (module_exists('devel_node_access')) {
       // Enable Devel Node Access.
-      $this->drupalGet('admin/config/development/devel');
+      $this->backdropGet('admin/config/development/devel');
       $this->assertResponse(200);
-      $this->drupalPost('admin/config/development/devel', array(
+      $this->backdropPost('admin/config/development/devel', array(
         'devel_node_access_debug_mode' => '1',
       ), t('Save configuration'));
       $this->assertResponse(200, 'Devel Node Access configuration saved.');
 
       // Enable the second DNA block, too.
-      $this->drupalPost('admin/structure/block/list', array(
+      $this->backdropPost('admin/structure/block/list', array(
         'blocks[devel_node_access_dna_user][region]' => 'footer',
       ), t('Save blocks'));
     }
     if (module_exists('devel')) {
-      $this->drupalPost('admin/config/development/devel', array(
+      $this->backdropPost('admin/config/development/devel', array(
         'devel_error_handlers[]' => array(1, 2, 4),
       ), t('Save configuration'));
       $this->assertResponse(200, 'Devel configuration saved.');
-      $this->drupalPost('admin/people/permissions/list', array(
+      $this->backdropPost('admin/people/permissions/list', array(
         '1[access devel information]' => 'access devel information',
         '2[access devel information]' => 'access devel information',
       ), t('Save permissions'));
@@ -145,41 +145,41 @@ class ForumAccessBaseTestCase extends ForumTestCase {
 
     // Get rids and uids up to 10/9.
     for ($i = 0; $i < 3; ++$i) {
-      $dummy_rid = (int) $this->drupalCreateRole(array(), 'dummy');
-      $dummy_user = $this->drupalCreateNamedUser('Dummy', array($dummy_rid));
+      $dummy_rid = (int) $this->backdropCreateRole(array(), 'dummy');
+      $dummy_user = $this->backdropCreateNamedUser('Dummy', array($dummy_rid));
       user_role_delete($dummy_rid);
       user_delete($dummy_user->uid);
     }
 
     // Create our roles.
     $this->admin_rid = 3;
-    $this->webmaster_rid = (int) $this->drupalCreateRole(array('administer blocks', 'administer forums', 'administer nodes', 'administer comments', 'administer menu', 'administer taxonomy', 'create forum content', 'access content overview', 'access administration pages', 'view revisions', 'revert revisions', 'delete revisions'), '11 webmaster');
-    $this->forum_admin_rid = (int) $this->drupalCreateRole(array('administer forums', 'create forum content', 'edit any forum content', 'delete any forum content', /* 'access content overview', 'access administration pages', */), '12 forum admin');
-    $this->edndel_any_content_rid = (int) $this->drupalCreateRole(array('create forum content', 'edit any forum content', 'delete any forum content', 'view own unpublished content'), '13 edndel any content');
-    $this->edndel_own_content_rid = (int) $this->drupalCreateRole(array('create forum content', 'edit own forum content', 'delete own forum content'), '14 edndel own content');
-    $this->edit_any_content_rid = (int) $this->drupalCreateRole(array('create forum content', 'edit any forum content', 'view own unpublished content'), '15 edit any content');
-    $this->edit_own_content_rid = (int) $this->drupalCreateRole(array('create forum content', 'edit own forum content', 'edit own comments'), '16 edit own content');
-    $this->delete_any_content_rid = (int) $this->drupalCreateRole(array('create forum content', 'delete any forum content', 'view own unpublished content'), '17 delete any content');
-    $this->delete_own_content_rid = (int) $this->drupalCreateRole(array('create forum content', 'delete own forum content', 'edit own comments'), '18 delete own content');  // EOC should not make any difference!
-    $this->create_content_rid = (int) $this->drupalCreateRole(array('create forum content'), '19 create content');
-    $this->anon_rid = DRUPAL_ANONYMOUS_RID;
-    $this->auth_rid = DRUPAL_AUTHENTICATED_RID;
+    $this->webmaster_rid = (int) $this->backdropCreateRole(array('administer blocks', 'administer forums', 'administer nodes', 'administer comments', 'administer menu', 'administer taxonomy', 'create forum content', 'access content overview', 'access administration pages', 'view revisions', 'revert revisions', 'delete revisions'), '11 webmaster');
+    $this->forum_admin_rid = (int) $this->backdropCreateRole(array('administer forums', 'create forum content', 'edit any forum content', 'delete any forum content', /* 'access content overview', 'access administration pages', */), '12 forum admin');
+    $this->edndel_any_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'edit any forum content', 'delete any forum content', 'view own unpublished content'), '13 edndel any content');
+    $this->edndel_own_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'edit own forum content', 'delete own forum content'), '14 edndel own content');
+    $this->edit_any_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'edit any forum content', 'view own unpublished content'), '15 edit any content');
+    $this->edit_own_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'edit own forum content', 'edit own comments'), '16 edit own content');
+    $this->delete_any_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'delete any forum content', 'view own unpublished content'), '17 delete any content');
+    $this->delete_own_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'delete own forum content', 'edit own comments'), '18 delete own content');  // EOC should not make any difference!
+    $this->create_content_rid = (int) $this->backdropCreateRole(array('create forum content'), '19 create content');
+    $this->anon_rid = BACKDROP_ANONYMOUS_RID;
+    $this->auth_rid = BACKDROP_AUTHENTICATED_RID;
 
     // Create our users.
-    $this->admin_user = $this->drupalCreateNamedUser('10_Administrator', array($this->admin_rid));
-    $this->webmaster_user = $this->drupalCreateNamedUser('11_Webmaster', array($this->webmaster_rid));
-    $this->forum_admin_user = $this->drupalCreateNamedUser('12_Forum_admin', array($this->forum_admin_rid));
-    $this->edndel_any_content_user = $this->drupalCreateNamedUser('13_EdNDel_any_content', array($this->edndel_any_content_rid));
-    $this->edndel_own_content_user = $this->drupalCreateNamedUser('14_EdNDel_own_content', array($this->edndel_own_content_rid));
-    $this->edit_any_content_user = $this->drupalCreateNamedUser('15_Edit_any_content', array($this->edit_any_content_rid));
-    $this->edit_own_content_user = $this->drupalCreateNamedUser('16_Edit_own_content', array($this->edit_own_content_rid));
-    $this->delete_any_content_user = $this->drupalCreateNamedUser('17_Delete_any_content', array($this->delete_any_content_rid));
-    $this->delete_own_content_user = $this->drupalCreateNamedUser('18_Delete_own_content', array($this->delete_own_content_rid));
-    $this->create_content_user = $this->drupalCreateNamedUser('19_Create_content', array($this->create_content_rid));
-    $this->auth_user = $this->drupalCreateNamedUser('20_Auth_only', array());
-    $this->moderator = $this->drupalCreateNamedUser('21_Moderator', array($this->create_content_rid));
+    $this->admin_user = $this->backdropCreateNamedUser('10_Administrator', array($this->admin_rid));
+    $this->webmaster_user = $this->backdropCreateNamedUser('11_Webmaster', array($this->webmaster_rid));
+    $this->forum_admin_user = $this->backdropCreateNamedUser('12_Forum_admin', array($this->forum_admin_rid));
+    $this->edndel_any_content_user = $this->backdropCreateNamedUser('13_EdNDel_any_content', array($this->edndel_any_content_rid));
+    $this->edndel_own_content_user = $this->backdropCreateNamedUser('14_EdNDel_own_content', array($this->edndel_own_content_rid));
+    $this->edit_any_content_user = $this->backdropCreateNamedUser('15_Edit_any_content', array($this->edit_any_content_rid));
+    $this->edit_own_content_user = $this->backdropCreateNamedUser('16_Edit_own_content', array($this->edit_own_content_rid));
+    $this->delete_any_content_user = $this->backdropCreateNamedUser('17_Delete_any_content', array($this->delete_any_content_rid));
+    $this->delete_own_content_user = $this->backdropCreateNamedUser('18_Delete_own_content', array($this->delete_own_content_rid));
+    $this->create_content_user = $this->backdropCreateNamedUser('19_Create_content', array($this->create_content_rid));
+    $this->auth_user = $this->backdropCreateNamedUser('20_Auth_only', array());
+    $this->moderator = $this->backdropCreateNamedUser('21_Moderator', array($this->create_content_rid));
 
-    $anon = drupal_anonymous_user();
+    $anon = backdrop_anonymous_user();
     $anon->name = check_plain(format_username($anon));
     $this->accounts = array(
       $this->user1, $this->admin_user, $this->webmaster_user, $this->forum_admin_user,
@@ -195,9 +195,9 @@ class ForumAccessBaseTestCase extends ForumTestCase {
       $this->delete_any_content_rid, $this->delete_own_content_rid, $this->create_content_rid,
     );
     // Show settings for reference.
-    $this->drupalGet('admin/people/permissions/list');
+    $this->backdropGet('admin/people/permissions/list');
     $this->assertResponse(200, '^^^ Permissions');
-    $this->drupalGet('admin/people', array('query' => array('sort' => 'asc', 'order' => drupal_encode_path(t('Username')))));
+    $this->backdropGet('admin/people', array('query' => array('sort' => 'asc', 'order' => backdrop_encode_path(t('Username')))));
     $this->assertResponse(200, '^^^ Users');
   }
 
@@ -287,7 +287,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
   }
 
   /**
-   * Extend drupalCreateUser() base method to accept a name as well as
+   * Extend backdropCreateUser() base method to accept a name as well as
    * multiple roles (rather than permissions).
    *
    * @param $name
@@ -298,7 +298,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
    *   A fully loaded user object with pass_raw property, or FALSE if account
    *   creation fails.
    */
-  protected function drupalCreateNamedUser($name, $rids = array()) {
+  protected function backdropCreateNamedUser($name, $rids = array()) {
     // Create a user.
     $rids2 = array();
     foreach ($rids as $rid) {
@@ -311,7 +311,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $edit['pass']   = user_password();
     $edit['status'] = 1;
 
-    $account = user_save(drupal_anonymous_user(), $edit);
+    $account = user_save(backdrop_anonymous_user(), $edit);
 
     $this->assertTrue(!empty($account->uid), t('User %name created, uid=%uid.', array('%name' => $edit['name'], '%uid' => $account->uid)), t('User login'));
     if (empty($account->uid)) {
@@ -334,7 +334,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
 
   protected function createForumCommentWithText($node, $text) {
     static $cid = 0;
-    $this->drupalPost("node/$node->nid", array(
+    $this->backdropPost("node/$node->nid", array(
       'comment_body[' . LANGUAGE_NONE . '][0][value]' => $text,
     ), t('Save'));
     $this->assertResponse(200);
@@ -357,9 +357,9 @@ class ForumAccessBaseTestCase extends ForumTestCase {
    *  Set to TRUE if this is the default forum (without any moderator).
    */
   function checkForum($forum, $is_default = FALSE) {
-    $this->drupalLogin($this->user1);
+    $this->backdropLogin($this->user1);
 
-    $this->drupalGet("admin/structure/forum/edit/forum/$forum->tid");
+    $this->backdropGet("admin/structure/forum/edit/forum/$forum->tid");
     $this->assertResponse(200, "^^^ '$forum->name' exists.");
 
     foreach ($this->accounts as $key => $account) {
@@ -380,21 +380,21 @@ class ForumAccessBaseTestCase extends ForumTestCase {
       $account->comment = $this->createForumCommentWithText($account->node, "Comment for $account->name");
     }
     // Show the topic list.
-    $this->drupalGet("forum/$forum->tid");
+    $this->backdropGet("forum/$forum->tid");
     $this->assertResponse(200, "^^^ '$forum->name' initial topics.");
 
     foreach ($this->accounts as $key => $account) {
       $is_super_user = user_access('bypass node access', $account) || ($account->uid == $this->moderator->uid && !$is_default);
 
       if (!empty($account->uid)) {
-        $this->drupalLogin($account);
+        $this->backdropLogin($account);
       }
       else {
-        $this->drupalLogout();
+        $this->backdropLogout();
       }
 
       // Check whether we have an 'Add new Forum topic' link.
-      $this->drupalGet('forum');
+      $this->backdropGet('forum');
 
       if (empty($account->access['view']) && !$is_super_user) {
         $this->assertResponse(403, "^^^ $account->name cannot see the Forum Overview");
@@ -415,17 +415,17 @@ class ForumAccessBaseTestCase extends ForumTestCase {
         $comment = &$account->comment;
         $node = &$account->node;
         if ((empty($account->access['view']) || !user_access('access content', $account)) && !$is_super_user) {
-          $this->drupalGet("forum/$forum->tid");
+          $this->backdropGet("forum/$forum->tid");
           $this->assertResponse(404, "^^^ $account->name cannot access '$forum->name'.");
-          $this->drupalGet("node/$node->nid");
+          $this->backdropGet("node/$node->nid");
           $this->assertResponse(403, "^^^ $account->name cannot access $test_type topic.");
-          $this->drupalGet("node/$node->nid/edit");
+          $this->backdropGet("node/$node->nid/edit");
           $this->assertResponse(403, "$account->name cannot edit $test_type topic (not accessible).");
-          $this->drupalGet("comment/$comment->cid");
+          $this->backdropGet("comment/$comment->cid");
           $this->assertResponse(403, "^^^ $account->name cannot access comment '$comment->subject'.");
         }
         else {
-          $this->drupalGet("forum/$forum->tid");
+          $this->backdropGet("forum/$forum->tid");
           $this->assertResponse(200, "^^^ '$forum->name' as $account->name.");
 
           $this->assertLink($node->title);
@@ -437,7 +437,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
           // Check comment visibility.
           if (!$is_super_user && (!user_access('access comments', $account) || empty($account->access['view'])) && !user_access('administer comments', $account)) {
             $this->assertNoLinkByHref("/comment/$comment->cid#comment-$comment->cid");
-            $this->drupalGet("comment/$comment->cid");
+            $this->backdropGet("comment/$comment->cid");
             $this->assertResponse(403, "^^^ $account->name cannot see comment '$comment->subject'.");
           }
           else {
@@ -450,56 +450,56 @@ class ForumAccessBaseTestCase extends ForumTestCase {
               $this->assertNoLink(t('Add new comment'));
               $this->assertNoText(t('Add new comment'));
               $this->assertNoLink(t('reply'));
-              $this->drupalGet("comment/$comment->cid");
+              $this->backdropGet("comment/$comment->cid");
               $this->assertResponse(200, '^^^ ' . "Comment '$comment->subject' is visible to $account->name'.");
-              $this->drupalGet("comment/reply/$node->nid");
+              $this->backdropGet("comment/reply/$node->nid");
               $this->assertResponse(403);
-              $this->drupalGet("comment/reply/$node->nid/$comment->cid");
+              $this->backdropGet("comment/reply/$node->nid/$comment->cid");
               $this->assertResponse(403);
             }
             else {
               $this->assertText(t('Add new comment'));
               $this->assertLink(t('reply'));
               $this->assertLinkByHref("comment/reply/$node->nid/$comment->cid");
-              $this->drupalGet("comment/reply/$node->nid/$comment->cid");
+              $this->backdropGet("comment/reply/$node->nid/$comment->cid");
               $this->assertResponse(200);
             }
 
             // Check comment edit links.
             global $user;
-            drupal_save_session(FALSE);
+            backdrop_save_session(FALSE);
             $user_save = $user;
             $user = $account;
             // We ignore the 'edit own comments' permission!
             $comment_access_edit = FALSE;  // comment_access('edit', $comment);
             $user = $user_save;
-            drupal_save_session(TRUE);
-            $this->drupalGet("comment/$comment->cid");
+            backdrop_save_session(TRUE);
+            $this->backdropGet("comment/$comment->cid");
             $this->assertResponse(200);
             if (empty($account->access['update']) && !$is_super_user && !$comment_access_edit && !user_access('administer comments', $account) && !user_access('edit any forum content', $account) && !($account->uid == $comment->uid && user_access('edit own forum content', $account))) {
               $this->assertNoLink(t('edit'));
-              $this->drupalGet("comment/$comment->cid/edit");
+              $this->backdropGet("comment/$comment->cid/edit");
               $this->assertResponse(403);
             }
             else {
               $this->assertLink(t('edit'));
               $this->clickLink(t('edit'));
               $this->assertResponse(200);
-              $this->drupalGet("comment/$comment->cid/edit");
+              $this->backdropGet("comment/$comment->cid/edit");
               $this->assertResponse(200);
               $this->assertText($comment->subject);
               $comment->subject .= ' (updated)';
-              $this->drupalPost("comment/$comment->cid/edit", array(
+              $this->backdropPost("comment/$comment->cid/edit", array(
                 'subject' => $comment->subject,
               ), t('Save'));
               $this->assertText(t("Your comment has been posted."));  // It ought to say 'updated'!
             }
 
             // Check comment delete links.
-            $this->drupalGet("comment/$comment->cid");
+            $this->backdropGet("comment/$comment->cid");
             if ((empty($account->access['delete'])) && !$is_super_user && !user_access('administer comments', $account) && !user_access('delete any forum content', $account) && !($account->uid == $comment->uid && user_access('delete own forum content', $account))) {
               $this->assertNoLink(t('delete'));
-              $this->drupalGet("comment/$comment->cid/delete");
+              $this->backdropGet("comment/$comment->cid/delete");
               $this->assertResponse(403);
             }
             else {
@@ -507,9 +507,9 @@ class ForumAccessBaseTestCase extends ForumTestCase {
               $this->assertLink(t('delete'));
               $this->clickLink(t('delete'));
               $this->assertResponse(200);
-              $this->drupalGet("comment/$comment->cid/delete");
+              $this->backdropGet("comment/$comment->cid/delete");
               $this->assertResponse(200);
-              $this->drupalPost("comment/$comment->cid/delete", array(), t('Delete'));
+              $this->backdropPost("comment/$comment->cid/delete", array(), t('Delete'));
               $this->assertText(t('The comment and all its replies have been deleted.'));
               $this->assertNoText($comment->subject);
               unset($account->comment);
@@ -517,13 +517,13 @@ class ForumAccessBaseTestCase extends ForumTestCase {
           }
 
           // Check whether we can Edit our topic.
-          $this->drupalGet("node/$node->nid");
+          $this->backdropGet("node/$node->nid");
           $this->assertResponse(200);
           if (empty($account->access['update']) && !user_access('edit any forum content', $account) &&
               !(user_access('edit own forum content', $account) && $node->uid == $account->uid) &&
               !$is_super_user) {
             $this->assertNoLink(t('Edit'));
-            $this->drupalGet("node/$node->nid/edit");
+            $this->backdropGet("node/$node->nid/edit");
             $this->assertResponse(403, "$account->name cannot edit $test_type topic.");
           }
           else {
@@ -565,7 +565,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
 
             // Change the title.
             $node->title = $node->title . ' (changed)';
-            $this->drupalPost("node/$node->nid/edit", array(
+            $this->backdropPost("node/$node->nid/edit", array(
               'title' => $node->title,
             ), t('Save'));
             $this->assertText(t('Forum topic !title has been updated.', array('!title' => $node->title)));
@@ -575,11 +575,11 @@ class ForumAccessBaseTestCase extends ForumTestCase {
           if (empty($account->access['delete']) && !user_access('delete any forum content', $account) &&
               !(user_access('delete own forum content', $account) && $node->uid == $account->uid) &&
               !$is_super_user) {
-            $this->drupalGet("node/$node->nid/delete");
+            $this->backdropGet("node/$node->nid/delete");
             $this->assertResponse(403, "$account->name cannot delete $test_type topic.");
           }
           else {
-            $this->drupalPost("node/$node->nid/delete", array(), t('Delete'));
+            $this->backdropPost("node/$node->nid/delete", array(), t('Delete'));
             $this->assertText(t('Forum topic !title has been deleted.', array('!title' => $node->title)));
           }
         }
@@ -587,7 +587,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
         if ($test_type == 'any' && (!empty($account->access['view']) || $is_super_user)) {
           // Check whether we can create a topic.
           if ((empty($account->access['create']) || !user_access('create forum content', $account)) && !$is_super_user) {
-            $this->drupalGet('forum');
+            $this->backdropGet('forum');
             if (empty($account->uid)) {
               $this->assertLinkByHref('/user/login?destination=forum');
             }
@@ -595,37 +595,37 @@ class ForumAccessBaseTestCase extends ForumTestCase {
               $this->assertResponse(200, "^^^ $account->name can see the Forum Overview, but...");
               $this->assertText(t('You are not allowed to post new content in the forum.'));
             }
-            $this->drupalGet("node/add/forum/$forum->tid");
+            $this->backdropGet("node/add/forum/$forum->tid");
             $this->assertResponse(403, "^^^ $account->name cannot create a forum topic in '$forum->name'.");
             break;
           }
           else {
-            $this->drupalGet('forum');
+            $this->backdropGet('forum');
             $this->assertNoText(t('You are not allowed to post new content in the forum.'));
             $this->assertLink(t('Add new Forum topic'));
             $this->clickLink(t('Add new Forum topic'));
             $this->assertResponse(200, "^^^ $account->name can create a forum topic.");
-            $this->drupalGet("node/add/forum/$forum->tid");
+            $this->backdropGet("node/add/forum/$forum->tid");
             $this->assertResponse(200, "^^^ $account->name can create a forum topic in '$forum->name'.");
-            $this->drupalGet('forum');
+            $this->backdropGet('forum');
             $this->assertLink(t('Add new Forum topic'));
-            $this->drupalPost("node/add/forum/$forum->tid", array(
+            $this->backdropPost("node/add/forum/$forum->tid", array(
               'title' => "Topic 1 by $account->name",
             ), t('Save'));
             $node = $account->node = $this->createForumTopicWithTitle($forum, "Topic 2 by $account->name");
-            $this->drupalGet('node/' . $node->nid );
+            $this->backdropGet('node/' . $node->nid );
 
             $account->comment = $this->createForumCommentWithText($node, "Comment by $account->name");
 
-            $this->drupalGet("forum/$forum->tid");
+            $this->backdropGet("forum/$forum->tid");
             $this->assertResponse(200, "^^^ '$forum->name' as $account->name (own topic).");
           }
         }
       }
     }
 
-    $this->drupalLogin($this->user1);
-    $this->drupalGet("forum/$forum->tid");
+    $this->backdropLogin($this->user1);
+    $this->backdropGet("forum/$forum->tid");
     $this->assertResponse(200, "^^^ '$forum->name' remaining topics.");
   }
 
@@ -649,7 +649,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
         }
       }
     }
-    $this->drupalPost('admin/structure/forum/add/forum', $edit, t('Save'));
+    $this->backdropPost('admin/structure/forum/add/forum', $edit, t('Save'));
     $this->assertResponse(200, "'$forum->name' added.");
 
     // Set moderator.
@@ -659,9 +659,9 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $this->assertTrue(acl_has_user($acl_id, $this->moderator->uid), t('User %moderator is moderator.', array('%user' => $this->moderator->uid)));
 
     // Show the result.
-    $this->drupalGet("admin/structure/forum/edit/forum/$forum->tid");
+    $this->backdropGet("admin/structure/forum/edit/forum/$forum->tid");
     $this->assertResponse(200, "^^^ '$forum->name' exists, with these settings.");
-    $this->drupalGet('forum');
+    $this->backdropGet('forum');
     $this->assertResponse(200, 'Forum Overview');
     return $forum;
   }

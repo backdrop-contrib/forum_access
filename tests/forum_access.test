@@ -4,7 +4,7 @@
  * Tests for Forum Access module.
  */
 
-require_once(drupal_get_path('module', 'forum') . '/forum.test');
+require_once(backdrop_get_path('module', 'forum') . '/forum.test');
 
 /**
  * Functional tests for the Forum module, with Forum Access (and ACL) installed.
@@ -64,7 +64,7 @@ class ForumAccess00PlainTestCase extends ForumTestCase {
 }
 
 
-require_once(drupal_get_path('module', 'forum_access') . '/tests/forum_access_test_base.php');
+require_once(backdrop_get_path('module', 'forum_access') . '/tests/forum_access_test_base.php');
 
 
 /**
@@ -85,23 +85,23 @@ class ForumAccess11InitialConfigurationTestCase extends ForumAccessBaseTestCase 
     $this->pass('#########################<br />#1 - START test initial configuration @' . (time() - $this->time), '######');
 
     // Show permissions grid.
-    $this->drupalGet('admin/people/permissions/list');
+    $this->backdropGet('admin/people/permissions/list');
     $this->assertResponse(200, '^^^ Permissions');
     // Show list of users.
-    $this->drupalGet('admin/people');
+    $this->backdropGet('admin/people');
     $this->assertResponse(200);
     // Show list of users.
-    $this->drupalGet('admin/people', array('query' => array('sort' => 'asc', 'order' => drupal_encode_path(t('Username')))));
+    $this->backdropGet('admin/people', array('query' => array('sort' => 'asc', 'order' => backdrop_encode_path(t('Username')))));
     $this->assertResponse(200, '^^^ Users');
     // Show list of forums aka Forum Overview (only 'General discussion' at this point).
-    $this->drupalGet('forum');
+    $this->backdropGet('forum');
     $this->assertResponse(200, '^^^ Forums');
     // Show administrative list of forums.
-    $this->drupalGet('admin/structure/forum');
+    $this->backdropGet('admin/structure/forum');
     $this->assertResponse(200, '^^^ Forum Administration Overview');
 
     // Show default forum settings after installation of FA.
-    $this->drupalGet('admin/structure/forum/edit/forum/1');
+    $this->backdropGet('admin/structure/forum/edit/forum/1');
     $this->assertResponse(200, '^^^ Forum 1 Administration');
 
     // Verify the checked state of the checkboxes.
@@ -137,12 +137,12 @@ class ForumAccess11InitialConfigurationTestCase extends ForumAccessBaseTestCase 
     }
 
     // Remove the Drupal default forum.
-    $this->drupalGet('forum/1');
+    $this->backdropGet('forum/1');
     $this->assertResponse(200);
     taxonomy_term_delete(1);
-    $this->drupalGet('forum/1');
+    $this->backdropGet('forum/1');
     $this->assertResponse(404);
-    $this->drupalGet('forum');
+    $this->backdropGet('forum');
     $this->assertResponse(200);
     $this->assertText(t('No forums defined'), 'Drupal default forum removed.');
 
@@ -171,7 +171,7 @@ class ForumAccess12DefaultConfigurationTestCase extends ForumAccessBaseTestCase 
     $this->pass('#########################<br />#2 - START Default Configuration test @' . (time() - $this->time), '<a id="jump1" href="#jump2">/\<br />######<br />\/</a>');
 
     // Create a forum with default settings.
-    //$this->drupalGet('admin/structure/forum/add/forum');
+    //$this->backdropGet('admin/structure/forum/add/forum');
     //$this->assertResponse(200);
     $edit = array(
       'name' => 'Forum 2 (Default)',
@@ -181,11 +181,11 @@ class ForumAccess12DefaultConfigurationTestCase extends ForumAccessBaseTestCase 
     );
     $forum = (object) ($edit + array('tid' => 2));
     // Create forum.
-    $this->drupalPost('admin/structure/forum/add/forum', $edit, t('Save'));
+    $this->backdropPost('admin/structure/forum/add/forum', $edit, t('Save'));
     $this->assertResponse(200, "$forum->name added.");
-    $this->drupalGet("admin/structure/forum/edit/forum/$forum->tid");
+    $this->backdropGet("admin/structure/forum/edit/forum/$forum->tid");
     $this->assertResponse(200, "^^^ $forum->name exists, with these settings.");
-    $this->drupalGet('forum');
+    $this->backdropGet('forum');
     $this->assertResponse(200, 'Forum Overview');
     $this->checkForum($forum, TRUE);
     $this->pass('#########################<br />#2 - END Default Configuration test @' . (time() - $this->time), '<a id="jump2" href="#jump3">/\<br />######<br />\/</a>');
