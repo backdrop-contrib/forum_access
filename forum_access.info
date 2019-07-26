@@ -4,8 +4,8 @@ dependencies[] = acl
 dependencies[] = chain_menu_access
 dependencies[] = forum
 package = Access control
-core = 7.x
+backdrop = 1.x
+type = module
 
 configure = admin/structure/forum
 
-files[] = tests/forum_access.test

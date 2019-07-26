@@ -15,26 +15,29 @@
  * Remind the user to upgrade to Chain Menu Access API 2.x.
  */
 function forum_access_requirements($phase) {
-  require_once DRUPAL_ROOT . '/includes/install.inc';
+  require_once BACKDROP_ROOT . '/includes/install.inc';
   $result = array();
   switch ( $phase ) {
     case 'update':
     case 'runtime':
       $t = get_t();
-      $path = drupal_get_filename('module', 'chain_menu_access');
+      $path = backdrop_get_filename('module', 'chain_menu_access');
       $path = substr($path, 0, strlen($path) - 7) . '.info';
-      $info = drupal_parse_info_file($path);
+      $info = backdrop_parse_info_file($path);
       $version = (isset($info['version']) ? $info['version'] : $t('Unknown'));
       $found = preg_match('/7\.x-([0-9]*)\./', $version, $matches);
       if (($found && $matches[1] == 1) || !$found) {
         $cma = 'Chain Menu Access API';
-        $variables = array('@Chain_Menu_Access_API' => $cma, '@module' => url('admin/modules'));
+        $variables = array(
+          '@Chain_Menu_Access_API' => $cma,
+          '@module' => url('admin/modules'),
+        );
         $result[] = array(
-          'title'       => $t('@Chain_Menu_Access_API module', $variables),
-          'value'       => $version,
+          'title' => $t('@Chain_Menu_Access_API module', $variables),
+          'value' => $version,
           'description' => $t('Version 1.x is obsolete. Upgrade to version 2.x as soon as <em>all</em> installed client modules support that version.') . '<br />' .
                            $t('Check the <a href="@module">module administration page</a> to find out which of your modules depend on @Chain_Menu_Access_API.', $variables),
-          'severity'    => REQUIREMENT_WARNING,
+          'severity' => REQUIREMENT_WARNING,
         );
       }
   }
@@ -51,22 +54,22 @@ function forum_access_menu_alter(&$items) {
   if (!empty($requirements) && $requirements[0]['value'] != t('Unknown')) {
     // Fall back to obsolete Chain Menu Access API version 7.x-1.x,
     // because that's what's installed.
-    chain_menu_access_chain($items['forum'],                 'forum_access_view_any_forum', array());
-    chain_menu_access_chain($items['node/%node'],            '_forum_access_node_access_callback', array(1, 'view'));
+    chain_menu_access_chain($items['forum'],                   'forum_access_view_any_forum', array());
+    chain_menu_access_chain($items['node/%node'],              '_forum_access_node_access_callback', array(1, 'view'));
     chain_menu_access_chain($items['comment/%comment/edit'], '_forum_access_comment_edit_callback', array(1));
     chain_menu_access_chain($items['comment/%comment/edit'], '_forum_access_comment_access_callback', array(1, 2), TRUE);
-    chain_menu_access_chain($items['comment/%/delete'],      '_forum_access_comment_access_callback', array(1, 2), TRUE);
-    chain_menu_access_chain($items['comment/%/approve'],     '_forum_access_comment_access_callback', array(1, 2), TRUE);
-    chain_menu_access_chain($items['comment/reply/%node'],   '_forum_access_comment_access_callback', array(2, 1));
+    chain_menu_access_chain($items['comment/%/delete'],        '_forum_access_comment_access_callback', array(1, 2), TRUE);
+    chain_menu_access_chain($items['comment/%/approve'],       '_forum_access_comment_access_callback', array(1, 2), TRUE);
+    chain_menu_access_chain($items['comment/reply/%node'],     '_forum_access_comment_access_callback', array(2, 1));
   }
   else {
-    chain_menu_access_chain($items, 'forum',                 'forum_access_view_any_forum');
-    chain_menu_access_chain($items, 'node/%node',            '_forum_access_node_access_callback', array(1, 'view'));
+    chain_menu_access_chain($items, 'forum',                   'forum_access_view_any_forum');
+    chain_menu_access_chain($items, 'node/%node',              '_forum_access_node_access_callback', array(1, 'view'));
     chain_menu_access_chain($items, 'comment/%comment/edit', '_forum_access_comment_edit_callback', array(1));
     chain_menu_access_chain($items, 'comment/%comment/edit', '_forum_access_comment_access_callback', array(1, 2), TRUE);
-    chain_menu_access_chain($items, 'comment/%/delete',      '_forum_access_comment_access_callback', array(1, 2), TRUE);
-    chain_menu_access_chain($items, 'comment/%/approve',     '_forum_access_comment_access_callback', array(1, 2), TRUE);
-    chain_menu_access_chain($items, 'comment/reply/%node',   '_forum_access_comment_access_callback', array(2, 1));
+    chain_menu_access_chain($items, 'comment/%/delete',        '_forum_access_comment_access_callback', array(1, 2), TRUE);
+    chain_menu_access_chain($items, 'comment/%/approve',       '_forum_access_comment_access_callback', array(1, 2), TRUE);
+    chain_menu_access_chain($items, 'comment/reply/%node',     '_forum_access_comment_access_callback', array(2, 1));
   }
 }
 
@@ -139,6 +142,16 @@ function _forum_access_comment_access_callback($comment, $op) {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function forum_access_config_info() {
+  $prefixes['forum_access.settings'] = array(
+    'label' => t('Module name settings'),
+    'group' => t('Configuration'),
+  );
+}
+
+/**
  * Access callback for the 'forum' menu item.
  *
  * Returns 1 if the user has at least one role that can access
@@ -147,7 +160,7 @@ function _forum_access_comment_access_callback($comment, $op) {
  */
 function forum_access_view_any_forum($account = NULL) {
   global $user;
-  $returns = &drupal_static(__FUNCTION__, array());
+  $returns = &backdrop_static(__FUNCTION__, array());
 
   if (!isset($account)) {
     $account = $user;
@@ -160,10 +173,10 @@ function forum_access_view_any_forum($account = NULL) {
     if (!user_access('access content')) {
       return $returns[$account->uid] = FALSE;
     }
-    $rids = variable_get('forum_access_rids', NULL);
+    $rids = config_get('forum_access.settings', 'forum_access_rids');
     if (!isset($rids)) {
       $rids = db_query("SELECT fa.rid FROM {forum_access} fa WHERE fa.grant_view > 0 GROUP BY fa.rid")->fetchCol();
-      variable_set('forum_access_rids', $rids);
+      config_set('forum_access.settings', 'forum_access_rids', $rids);
     }
     foreach ($rids as $rid) {
       if (isset($account->roles[$rid])) {
@@ -209,19 +222,19 @@ function forum_access_node_access_records($node) {
 
   static $seers;
 
-  $grants = &drupal_static(__FUNCTION__, array());
-  $seers = &drupal_static(__FUNCTION__ . '__seers');
+  $grants = &backdrop_static(__FUNCTION__, array());
+  $seers = &backdrop_static(__FUNCTION__ . '__seers');
   $tid = _forum_access_get_tid($node);
 
   // Set proper grants for nodecomment comment nodes.
   //if (isset($node->comment_target_nid)) {
-  //  if ($changed_tid = _forum_access_changed_tid()) {
-  //    $tid = $changed_tid; // the topic node hasn't been saved yet!
-  //  }
-  //  else {
-  //    $node = node_load($node->comment_target_nid);
-  //    $tid = _forum_access_get_tid($node);
-  //  }
+//  if ($changed_tid = _forum_access_changed_tid()) {
+//    $tid = $changed_tid; // the topic node hasn't been saved yet!
+//  }
+//  else {
+//    $node = node_load($node->comment_target_nid);
+//    $tid = _forum_access_get_tid($node);
+//  }
   //}
 
   if ($tid) {
@@ -230,19 +243,19 @@ function forum_access_node_access_records($node) {
         $seers = user_roles(FALSE, 'bypass node access');
       }
       $result = db_query('SELECT * FROM {forum_access} WHERE tid = :tid', array(
-        ':tid' => $tid
+        ':tid' => $tid,
       ));
       foreach ($result as $grant) {
         if (isset($seers[$grant->rid])) {
           continue; // Don't provide any useless grants!
         }
         $grants[$tid][] = array(
-          'realm'        => 'forum_access',
-          'gid'          => $grant->rid,
-          'grant_view'   => $grant->grant_view,
+          'realm' => 'forum_access',
+          'gid' => $grant->rid,
+          'grant_view' => $grant->grant_view,
           'grant_update' => $grant->grant_update,
           'grant_delete' => $grant->grant_delete,
-          'priority'     => $grant->priority,
+          'priority' => $grant->priority,
         );
       }
       //dsm("forum_access_node_access_records($node->nid) (tid=$tid) returns ". var_export($grants[$tid], TRUE), 'status');
@@ -303,7 +316,7 @@ function forum_access_form_node_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
- * Implement hook_node_load().
+ * Implements hook_node_load().
  *
  * Sets $node->forum_tid to avoid confusing forum_node_view().
  */
@@ -331,6 +344,10 @@ function forum_access_query_alter($p1, $p2, $p3) {
   return;
 }
 
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
 function forum_access_query_term_access_alter(QueryAlterableInterface $query) {
   global $user;
 
@@ -378,7 +395,7 @@ function forum_access_query_term_access_alter(QueryAlterableInterface $query) {
  * Implements hook_node_presave().
  */
 function forum_access_node_presave($node, $return_old_tid = FALSE) {
-  $old_tid = &drupal_static('forum_access_node_presave');
+  $old_tid = &backdrop_static('forum_access_node_presave');
   if (_forum_node_check_node_type($node)) {
     $old_tid = db_query('SELECT tid FROM {forum} WHERE nid = :nid', array(
       ':nid' => $node->nid,
@@ -393,7 +410,7 @@ function forum_access_node_presave($node, $return_old_tid = FALSE) {
  * Implements hook_node_update().
  */
 function forum_access_node_update($node) {
-  $old_tid = &drupal_static('forum_access_node_presave');
+  $old_tid = &backdrop_static('forum_access_node_presave');
   if (_forum_node_check_node_type($node)) {
     $tid = _forum_access_get_tid($node);
     if (isset($old_tid)) {
@@ -403,16 +420,16 @@ function forum_access_node_update($node) {
       acl_node_clear_acls($node->nid, 'forum_access');
 
       /*
-      if (module_exists('nodecomment')) {
-        _forum_access_changed_tid($tid);
-        $result = db_query('SELECT cid FROM {node_comments} WHERE nid = :nid', array(
-          ':nid' => $node->nid,
-        ));
-        foreach ($result as $row) {
-          acl_node_clear_acls($row->cid, 'forum_access');
-        }
-      }
-      */
+       if (module_exists('nodecomment')) {
+       _forum_access_changed_tid($tid);
+       $result = db_query('SELECT cid FROM {node_comments} WHERE nid = :nid', array(
+       ':nid' => $node->nid,
+       ));
+       foreach ($result as $row) {
+       acl_node_clear_acls($row->cid, 'forum_access');
+       }
+       }
+       */
     }
     // For changed and for previously unassigned terms we need to fake an insert.
     forum_access_node_insert($node);
@@ -423,43 +440,47 @@ function forum_access_node_update($node) {
  * Implements hook_node_insert().
  */
 function forum_access_node_insert($node) {
-  $old_tid = &drupal_static('forum_access_node_presave');
+  $old_tid = &backdrop_static('forum_access_node_presave');
   if (_forum_node_check_node_type($node)) {
     if ($tid = _forum_access_get_tid($node)) {
       $acl_id = _forum_access_get_acl($tid);
       acl_node_add_acl($node->nid, $acl_id, 1, 1, 1);
 
       /*
-      if (isset($old_tid) && module_exists('nodecomment')) {
-        $result = db_query('SELECT cid FROM {node_comments} WHERE nid = :nid', array(
-          ':nid' => $node->nid,
-        ));
-        foreach ($result as $row) {
-          acl_node_add_acl($row->cid, $acl_id, 1, 1, 1);
-          node_access_acquire_grants(node_load($row->cid)); //TODO use node_load_multiple() here
-        }
-      }
-      */
+       if (isset($old_tid) && module_exists('nodecomment')) {
+       $result = db_query('SELECT cid FROM {node_comments} WHERE nid = :nid', array(
+       ':nid' => $node->nid,
+       ));
+       foreach ($result as $row) {
+       acl_node_add_acl($row->cid, $acl_id, 1, 1, 1);
+       node_access_acquire_grants(node_load($row->cid)); //TODO use node_load_multiple() here
+       }
+       }
+       */
     }
     $old_tid = NULL;
   }
   /*
-  elseif (isset($node->comment_target_nid)) {
-    // Set moderator on nodecomment.
-    $topic_node = node_load($node->comment_target_nid);
-    if (_forum_node_check_node_type($topic_node) && $topic_tid = _forum_access_get_tid($topic_node)) {
-      $acl_id = _forum_access_get_acl($topic_tid);
-      acl_node_add_acl($node->nid, $acl_id, 1, 1, 1);
-    }
-  }
-  */
+   elseif (isset($node->comment_target_nid)) {
+   // Set moderator on nodecomment.
+   $topic_node = node_load($node->comment_target_nid);
+   if (_forum_node_check_node_type($topic_node) && $topic_tid = _forum_access_get_tid($topic_node)) {
+   $acl_id = _forum_access_get_acl($topic_tid);
+   acl_node_add_acl($node->nid, $acl_id, 1, 1, 1);
+   }
+   }
+   */
 }
 
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
 function forum_access_enable_moderator($enable = TRUE) {
   global $user;
 
   if (!$enable || !user_access('administer comments')) {
-    $perm = &drupal_static('user_access');
+    $perm = &backdrop_static('user_access');
     if ($enable) {
       $perm[$user->uid]['administer comments'] = $enable;
       $user->_forum_access_moderator = $enable;
@@ -484,8 +505,7 @@ function forum_access_get_moderator_uids($tid) {
 /**
  * Implements hook_custom_theme().
  */
-function forum_access_custom_theme() {
-}
+function forum_access_custom_theme() { }
 
 /**
  * Implements hook_menu_get_item_alter().
@@ -530,7 +550,7 @@ function forum_access_current_tid($tid = NULL) {
  * and thus it is disabled by default. Set the variable to TRUE to enable.
  */
 function forum_access_preprocess_forum_list(&$variables) {
-  if (variable_get('forum_access_provide_moderators_template_variable', FALSE)) {
+  if (config_get('forum_access.settings', 'forum_access_provide_moderators_template_variable')) {
     foreach ($variables['forums'] as $tid => $forum) {
       $forum->forum_access_moderators = NULL;
       if ($uids = forum_access_get_moderator_uids($tid)) {
@@ -551,11 +571,11 @@ function forum_access_node_view_alter(&$build) {
     _forum_access_node_view_alter($build, $tid);
   }
 
-  $breadcrumb = drupal_get_breadcrumb();
+  $breadcrumb = backdrop_get_breadcrumb();
   if (!$tid && count($breadcrumb) == 2 && strpos($breadcrumb[0], '<a href="/">') === 0 && strpos($breadcrumb[1], '<a href="/forum">') === 0) {
     // We must hack away the bogus breadcrumb set by forum module
     // (empty taxonomy_forums).
-    $stored_breadcrumb = &drupal_static('drupal_set_breadcrumb');
+    $stored_breadcrumb = &backdrop_static('backdrop_set_breadcrumb');
     $stored_breadcrumb = NULL;
   }
 }
@@ -574,7 +594,7 @@ function forum_access_comment_view_alter(&$build) {
  * This is also required by ACL module.
  */
 function forum_access_enabled($set = NULL) {
-  static $enabled = TRUE; // not drupal_static!
+  static $enabled = TRUE; // not backdrop_static!
   if ($set !== NULL) {
     $enabled = $set;
   }
@@ -585,7 +605,7 @@ function forum_access_enabled($set = NULL) {
  * Implements hook_node_access().
  */
 function forum_access_node_access($node, $op, $account) {
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   $type = is_string($node) ? $node : $node->type;
   if ($op == 'create') {
@@ -608,7 +628,7 @@ function forum_access_node_access($node, $op, $account) {
           return $cache[$account->uid][$op][$nid] = NODE_ACCESS_DENY;
         }
         if (($op == 'update' && (user_access('edit any forum content', $account) || ($node->uid == $account->uid && user_access('edit own forum content', $account))))
-          || ($op == 'delete' && (user_access('delete any forum content', $account) || ($node->uid == $account->uid && user_access('delete own forum content', $account))))) {
+            || ($op == 'delete' && (user_access('delete any forum content', $account) || ($node->uid == $account->uid && user_access('delete own forum content', $account))))) {
           return $cache[$account->uid][$op][$nid] = forum_access_node_access($node, 'view', $account);
         }
         $access = forum_access_access($op, $tid, $account);
@@ -648,14 +668,14 @@ function forum_access_node_access($node, $op, $account) {
  *   2     - access granted for forum moderator
  */
 function forum_access_access($op, $tid, $account = NULL, $administer_nodes_sees_everything = TRUE) {
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
   if (!$account) {
     global $user;
     $account = $user;
   }
 
   if (user_access('bypass node access', $account)) {
-//TODO revise (including comment above)
+    //TODO revise (including comment above)
 //      $administer_nodes_sees_everything && user_access('administer nodes', $account) && array_search($type, array('view', 'update', 'delete')) !== FALSE) {
     return 1;
   }
@@ -704,7 +724,7 @@ function forum_access_taxonomy_term_delete($term) {
     db_delete('forum_access')
       ->condition('tid', $term->tid)
       ->execute();
-    variable_del('forum_access_rids'); // clear cache
+    config_clear('forum_access.settings', 'forum_access_rids'); // clear cache
   }
 }
 
@@ -739,6 +759,7 @@ function forum_access_is_moderator($account, $tid = NULL) {
  * Return forum.module's forum vocabulary ID.
  */
 function _forum_access_get_vid() {
+  // TODO This variable was removed in Backdrop without replacement.
   return variable_get('forum_nav_vocabulary', '');
 }
 
@@ -753,7 +774,7 @@ function _forum_access_get_tid($node) {
  * Saves and returns the $tid.
  */
 function _forum_access_changed_tid($tid = NULL) {
-  $saved_tid = &drupal_static(__FUNCTION__);
+  $saved_tid = &backdrop_static(__FUNCTION__);
   if (!empty($tid)) {
     $saved_tid = $tid;
   }
@@ -781,7 +802,7 @@ function _forum_access_module_load_include($type) {
 
   if (!isset($loaded[$type])) {
     $path = module_load_include($type, 'forum_access');
-    $loaded[$type] = drupal_get_path('module', 'forum_access') . "/forum_access.$type";
+    $loaded[$type] = backdrop_get_path('module', 'forum_access') . "/forum_access.$type";
   }
   return $loaded[$type];
 }
@@ -802,7 +823,7 @@ function forum_access_theme() {
  * Implements hook_node_access_explain().
  */
 function forum_access_node_access_explain($row) {
-  $roles = &drupal_static(__FUNCTION__);
+  $roles = &backdrop_static(__FUNCTION__);
   if ($row->realm == 'forum_access') {
     if (!isset($roles)) {
       $roles = user_roles();
@@ -822,5 +843,14 @@ function forum_access_acl_explain($acl_id, $name, $number, $users = NULL) {
     return "ACL (id=$acl_id) would grant access to nodes in forum/$number.";
   }
   return "ACL (id=$acl_id) grants access to nodes in forum/$number to the listed user(s).";
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function forum_access_autoload_info() {
+  return array(
+    'ForumAccessBaseTestCase' => 'tests/forum_access_test_base.php',
+  );
 }
 

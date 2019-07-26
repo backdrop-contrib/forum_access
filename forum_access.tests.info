@@ -1,0 +1,42 @@
+[ForumAccess00PlainTestCase]
+name = 0. Forum functionality (with FA and ACL)
+description = Run the Forum (!) module tests with Forum Access (and ACL) installed.
+group = Forum Access
+file = tests/forum_access.test
+
+[ForumAccess11InitialConfigurationTestCase]
+name = 1. Forum Access Initial Configuration
+description = Display and verify the initial configuration for all ensuing tests (roles, permissions, users, Forum Access default settings in a new forum).
+group = Forum Access
+file = tests/forum_access.test
+
+[ForumAccess12DefaultConfigurationTestCase]
+name = 2. Forum Access Default Configuration
+description = Test access for the default forum configuration.
+group = Forum Access
+file = tests/forum_access.test
+
+[ForumAccess13ReadOnlyConfigurationTestCase]
+name = 3. Forum Access Read-Only
+description = Test access for the configuration with only View access given.
+group = Forum Access
+file = tests/forum_access.test
+
+[ForumAccess14AllOffConfigurationTestCase]
+name = 4. Forum Access All-OFF Configuration
+description = Test access for the configuration with all access withheld.
+group = Forum Access
+file = tests/forum_access.test
+
+[ForumAccess15AllOnConfigurationTestCase]
+name = 5. Forum Access All-ON Configuration
+description = Test access for the configuration with all access given.
+group = Forum Access
+file = tests/forum_access.test
+
+[ForumAccess16NoViewConfigurationTestCase]
+name = 6. Forum Access No-View
+description = Test access for the configuration without View access (blocks all other access!).
+group = Forum Access
+file = tests/forum_access.test
+

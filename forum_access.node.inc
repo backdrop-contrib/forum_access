@@ -39,7 +39,7 @@ function _forum_access_comment_view_alter(&$build, $tid) {
   $node = $build['#node'];
   $comment = $build['#comment'];
   //dpm($build, "_forum_access_comment_view_alter() tid=[$tid] cid=[$comment->cid] BEFORE:");
-  $links =& $build['links']['comment']['#links'];
+  $links = &$build['links']['comment']['#links'];
 
   if ($user->uid != 1 && !user_access('bypass node access') && !forum_access_access('create', $tid)) {
     unset($links['comment-reply']);
@@ -61,7 +61,7 @@ function _forum_access_comment_view_alter(&$build, $tid) {
         $perm = ($op == 'update' ? 'edit' : $op);
         $access |= ($user->uid == $comment->uid && user_access("$perm own forum content"));
       }
-      $available_keys = variable_get("forum_access_allowed_comment_links_for_$op", $default_link_keys[$op]);
+      $available_keys = config_get('forum_access.settings', "forum_access_allowed_comment_links_for_$op");
       $old_links = $links;
       $links = array();
       foreach ($default_link_keys[$op] as $key) {
@@ -120,8 +120,8 @@ function _forum_access_node_form(&$form, &$form_state) {
   if (!empty($nid)) {
     // Edit an existing node.
     if (!forum_access_access('update', $form['forum_tid']['#value']) && !user_access('edit any forum content') && !(user_access('edit own forum content') && $form['uid']['#value'] == $user->uid)) {
-      drupal_access_denied();
-      drupal_exit();
+      backdrop_access_denied();
+      backdrop_exit();
     }
     $forum_tid = $form['forum_tid']['#value'];
     $tids[$forum_tid] = $forum_tid;
@@ -131,8 +131,8 @@ function _forum_access_node_form(&$form, &$form_state) {
     // is allowed, otherwise there will be much confusion.
     $forum_tid = arg(3);
     if (!empty($forum_tid) && is_numeric($forum_tid) && !isset($tids[$forum_tid])) {
-      drupal_access_denied();
-      drupal_exit();
+      backdrop_access_denied();
+      backdrop_exit();
     }
   }
 
@@ -157,7 +157,7 @@ function _forum_access_node_form(&$form, &$form_state) {
 
   // Apply modifications for Moderators (by role or uid).
   if (!user_access('administer nodes') && forum_access_is_moderator($user, $forum_tid)) {
-    $allowed_options = variable_get('forum_access_allowed_node_edit_options', array('status', 'sticky', 'subscriptions_notify'));
+    $allowed_options = config_get('forum_access.settings', 'forum_access_allowed_node_edit_options');
     foreach (element_children($form) as $key) {
       switch ($key) {
         case 'buttons':
@@ -191,7 +191,7 @@ function _forum_access_node_form(&$form, &$form_state) {
           $form['shadow']['#description'] .= '<br />' . t('Note: Access to this topic and its shadows is controlled by the forum that contains the topic.');
           break;
         case 'taxonomy_forums':
-          $desc =& $form['taxonomy_forums'][$form['taxonomy_forums']['#language']]['#description'];
+          $desc = &$form['taxonomy_forums'][$form['taxonomy_forums']['#language']]['#description'];
           if (!empty($desc)) {
             $desc .= '<br />';
           }
@@ -209,7 +209,7 @@ function _forum_access_comment_form(&$form, &$form_state) {
 
   $comment = $form_state['comment'];
   if ($form['cid']['#value'] && isset($form['author']) && !empty($user->_forum_access_moderator)) {
-    $editable_administration_elements = variable_get('forum_access_allowed_comment_edit_administration_elements', array('homepage', 'status', 'subscriptions_notify'));
+    $editable_administration_elements = config_get('forum_access.settings', 'forum_access_allowed_comment_edit_administration_elements');
     foreach (element_children($form['author']) as $key) {
       if (array_search($key, $editable_administration_elements) === FALSE) {
         $form['author'][$key]['#disabled'] = TRUE;
