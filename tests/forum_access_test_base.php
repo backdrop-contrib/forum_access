@@ -162,8 +162,8 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $this->delete_any_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'delete any forum content', 'view own unpublished content'), '17 delete any content');
     $this->delete_own_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'delete own forum content', 'edit own comments'), '18 delete own content');  // EOC should not make any difference!
     $this->create_content_rid = (int) $this->backdropCreateRole(array('create forum content'), '19 create content');
-    $this->anon_rid = BACKDROP_ANONYMOUS_RID;
-    $this->auth_rid = BACKDROP_AUTHENTICATED_RID;
+    $this->anon_rid = BACKDROP_ANONYMOUS_ROLE;
+    $this->auth_rid = BACKDROP_AUTHENTICATED_ROLE;
 
     // Create our users.
     $this->admin_user = $this->backdropCreateNamedUser('10_Administrator', array($this->admin_rid));

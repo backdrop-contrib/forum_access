@@ -383,7 +383,7 @@ function _forum_access_forum_interference_form($is_container, $na_modules, $fa_p
     $variables = array(
       '%content_type' => node_type_get_name('forum'),
       '!Forum_Access' => 'Forum Access',
-      '!Content_Access' => $l('Content Access', 'http://backdropcms.org/project/content_access'),
+      '!Content_Access' => $l('Content Access', 'http://drupal.org/project/content_access'),
       '@Content_Access' => 'Content Access',
       '!ACL' => 'ACL',
       '!module_list' => '<ul><li>' . implode($na_modules, '</li><li>') . '</li></ul>',
@@ -765,8 +765,8 @@ function _forum_access_get_settings($tid = NULL) {
   );
   if (!isset($tid)) {
     // Default to all users can read; all logged in users can post.
-    $return['view'] = array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID);
-    $return['create'] = array(BACKDROP_AUTHENTICATED_RID);
+    $return['view'] = array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE);
+    $return['create'] = array(BACKDROP_AUTHENTICATED_ROLE);
   }
   else {
     $result = db_query("SELECT * FROM {forum_access} where tid = :tid", array(
@@ -785,7 +785,7 @@ function _forum_access_get_settings($tid = NULL) {
       if ($access->grant_create) {
         $return['create'][] = $access->rid;
       }
-      if ($access->rid == BACKDROP_AUTHENTICATED_RID) { // this is our reference
+      if ($access->rid == BACKDROP_AUTHENTICATED_ROLE) { // this is our reference
         $return['priority'] = $access->priority;
       }
     }
