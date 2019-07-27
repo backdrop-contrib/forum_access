@@ -21,8 +21,8 @@ function forum_access_install() {
       ':vid' => $vid,
     ));
     $grant_create_by_rid = array(
-      BACKDROP_ANONYMOUS_RID => 0,
-      BACKDROP_AUTHENTICATED_RID => 1,
+      BACKDROP_ANONYMOUS_ROLE => 0,
+      BACKDROP_AUTHENTICATED_ROLE => 1,
     );
     foreach ($result as $td) {
       foreach ($grant_create_by_rid as $rid => $grant_create) {
@@ -136,11 +136,11 @@ function _forum_access_update_table() {
   foreach ($tids as $tid) {
     $record = array(
       'tid' => $tid,
-      'rid' => BACKDROP_ANONYMOUS_RID,
+      'rid' => BACKDROP_ANONYMOUS_ROLE,
       'grant_view' => 1,
     );
     backdrop_write_record('forum_access', $record);
-    $record['rid'] = BACKDROP_AUTHENTICATED_RID;
+    $record['rid'] = BACKDROP_AUTHENTICATED_ROLE;
     $record['grant_create'] = 1;
     backdrop_write_record('forum_access', $record);
   }

@@ -466,20 +466,20 @@ function _forum_access_forum_troubleshooting_form($is_container, $has_interferen
     $tr = 't';
     $l = 'l';
     $variables = array(
-      '!Forum_Access' => $l('Forum Access', 'http://drupal.org/project/forum_access'),
-      '!ACL' => $l('ACL', 'http://drupal.org/project/acl'),
+      '!Forum_Access' => $l('Forum Access', 'http://backdropcms.org/project/forum_access'),
+      '!ACL' => $l('ACL', 'http://backdropcms.org/project/acl'),
       '%Module_interference' => t('Module interference'),
       '!Forum_Access-dev' => $l('Forum&nbsp;Access&nbsp;7.x-1.x-dev', 'http://drupal.org/node/964638', array('html' => TRUE)),
       '!ACL-dev' => $l('ACL&nbsp;7.x-1.x-dev', 'http://drupal.org/node/694210', array('html' => TRUE)),
       '%devel_node_access' => 'devel_node_access',
-      '!Devel' => $l('Devel', 'http://drupal.org/project/devel'),
+      '!Devel' => $l('Devel', 'http://backdropcms.org/project/devel'),
       '!DNA' => 'DNA',
       '!debug_mode' => $l('debug mode', 'admin/config/development/devel', array('fragment' => 'edit-devel-node-access-debug-mode')),
       '!block' => $l('block', 'admin/structure/block/list'),
       '!dna_summary' => $l('devel/node_access/summary', 'devel/node_access/summary'),
       '!Rebuild_permissions' => $l($tr('Rebuild permissions'), 'admin/reports/status/rebuild'),
-      '!Forum_Access_' => $l('Forum Access', 'http://drupal.org/project/issues/forum_access'),
-      '!ACL_' => $l('ACL', 'http://drupal.org/project/issues/acl'),
+      '!Forum_Access_' => $l('Forum Access', 'https://github.com/backdrop-contrib/forum_access/issues'),
+      '!ACL_' => $l('ACL', 'https://github.com/backdrop-contrib/acl/issues'),
     );
     $form = array(
       '#type' => 'fieldset',
@@ -765,8 +765,8 @@ function _forum_access_get_settings($tid = NULL) {
   );
   if (!isset($tid)) {
     // Default to all users can read; all logged in users can post.
-    $return['view'] = array(BACKDROP_ANONYMOUS_RID, BACKDROP_AUTHENTICATED_RID);
-    $return['create'] = array(BACKDROP_AUTHENTICATED_RID);
+    $return['view'] = array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE);
+    $return['create'] = array(BACKDROP_AUTHENTICATED_ROLE);
   }
   else {
     $result = db_query("SELECT * FROM {forum_access} where tid = :tid", array(
@@ -785,7 +785,7 @@ function _forum_access_get_settings($tid = NULL) {
       if ($access->grant_create) {
         $return['create'][] = $access->rid;
       }
-      if ($access->rid == BACKDROP_AUTHENTICATED_RID) { // this is our reference
+      if ($access->rid == BACKDROP_AUTHENTICATED_ROLE) { // this is our reference
         $return['priority'] = $access->priority;
       }
     }
