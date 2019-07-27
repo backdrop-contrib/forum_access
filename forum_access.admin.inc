@@ -383,7 +383,7 @@ function _forum_access_forum_interference_form($is_container, $na_modules, $fa_p
     $variables = array(
       '%content_type' => node_type_get_name('forum'),
       '!Forum_Access' => 'Forum Access',
-      '!Content_Access' => $l('Content Access', 'http://backdropcms.org/project/content_access'),
+      '!Content_Access' => $l('Content Access', 'http://drupal.org/project/content_access'),
       '@Content_Access' => 'Content Access',
       '!ACL' => 'ACL',
       '!module_list' => '<ul><li>' . implode($na_modules, '</li><li>') . '</li></ul>',
