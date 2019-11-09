@@ -311,7 +311,13 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $edit['pass']   = user_password();
     $edit['status'] = 1;
 
-    $account = user_save(backdrop_anonymous_user(), $edit);
+    $account = backdrop_anonymous_user();
+    $account->name = $edit['name'];
+    $account->mail = $edit['mail'];
+    $account->roles = $edit['roles'];
+    $account->pass = $edit['pass'];
+    $account->status = $edit['status'];
+    $account->save();
 
     $this->assertTrue(!empty($account->uid), t('User %name created, uid=%uid.', array('%name' => $edit['name'], '%uid' => $account->uid)), t('User login'));
     if (empty($account->uid)) {
