@@ -306,7 +306,7 @@ function _forum_access_forum_grants_form(&$form_state, $is_container, $settings)
     );
   }
 
-  backdrop_add_css(backdrop_get_path('module', 'forum_access') . '/forum_access.css', array('preprocess' => FALSE));
+  backdrop_add_css(backdrop_get_path('module', 'forum_access') . '/css/forum_access.css', array('preprocess' => FALSE));
   return $form;
 }
 
