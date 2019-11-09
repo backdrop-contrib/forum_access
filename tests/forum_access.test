@@ -11,14 +11,6 @@ require_once(backdrop_get_path('module', 'forum') . '/forum.test');
  */
 class ForumAccess00PlainTestCase extends ForumTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => '0. Forum functionality (with FA and ACL)',
-      'description' => 'Run the Forum (!) module tests with Forum Access (and ACL) installed.',
-      'group' => 'Forum Access',
-    );
-  }
-
   /**
    * Implements setUp().
    */
@@ -71,14 +63,6 @@ require_once(backdrop_get_path('module', 'forum_access') . '/tests/forum_access_
  * Initial configuration tests for the Forum Access module.
  */
 class ForumAccess11InitialConfigurationTestCase extends ForumAccessBaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => '1. Forum Access Initial Configuration',
-      'description' => 'Display and verify the initial configuration for all ensuing tests (roles, permissions, users, Forum Access default settings in a new forum).',
-      'group' => 'Forum Access',
-    );
-  }
 
   function testInitialConfiguration() {
     $this->setUp2();
@@ -157,14 +141,6 @@ class ForumAccess11InitialConfigurationTestCase extends ForumAccessBaseTestCase 
  */
 class ForumAccess12DefaultConfigurationTestCase extends ForumAccessBaseTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => '2. Forum Access Default Configuration',
-      'description' => 'Test access for the default forum configuration.',
-      'group' => 'Forum Access',
-    );
-  }
-
   function testAccess2() {
     $this->setUp2();
     taxonomy_term_delete(1);
@@ -199,14 +175,6 @@ class ForumAccess12DefaultConfigurationTestCase extends ForumAccessBaseTestCase 
  */
 class ForumAccess13ReadOnlyConfigurationTestCase extends ForumAccessBaseTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => '3. Forum Access Read-Only',
-      'description' => 'Test access for the configuration with only View access given.',
-      'group' => 'Forum Access',
-    );
-  }
-
   function testAccess3() {
     $this->createAndCheckForum(3, 'Read-Only', 'All View checkboxes checked', array('view'));
   }
@@ -217,14 +185,6 @@ class ForumAccess13ReadOnlyConfigurationTestCase extends ForumAccessBaseTestCase
  * All-OFF configuration test for the Forum Access module.
  */
 class ForumAccess14AllOffConfigurationTestCase extends ForumAccessBaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => '4. Forum Access All-OFF Configuration',
-      'description' => 'Test access for the configuration with all access withheld.',
-      'group' => 'Forum Access',
-    );
-  }
 
   function testAccess4() {
     $this->createAndCheckForum(4, 'All-OFF', 'All checkboxes cleared', array());
@@ -237,14 +197,6 @@ class ForumAccess14AllOffConfigurationTestCase extends ForumAccessBaseTestCase {
  */
 class ForumAccess15AllOnConfigurationTestCase extends ForumAccessBaseTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => '5. Forum Access All-ON Configuration',
-      'description' => 'Test access for the configuration with all access given.',
-      'group' => 'Forum Access',
-    );
-  }
-
   function testAccess5() {
     $this->createAndCheckForum(5, 'All-ON', 'All checkboxes checked', $this->accesses);
   }
@@ -256,18 +208,9 @@ class ForumAccess15AllOnConfigurationTestCase extends ForumAccessBaseTestCase {
  */
 class ForumAccess16NoViewConfigurationTestCase extends ForumAccessBaseTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => '6. Forum Access No-View',
-      'description' => 'Test access for the configuration without View access (blocks all other access!).',
-      'group' => 'Forum Access',
-    );
-  }
-
   function testAccess6() {
     $accesses = $this->accesses;
     array_shift($accesses);
     $this->createAndCheckForum(6, 'No-View', 'All checkboxes checked except View column', $accesses);
   }
 }
-
