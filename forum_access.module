@@ -146,9 +146,10 @@ function _forum_access_comment_access_callback($comment, $op) {
  */
 function forum_access_config_info() {
   $prefixes['forum_access.settings'] = array(
-    'label' => t('Module name settings'),
+    'label' => t('Forum Access settings'),
     'group' => t('Configuration'),
   );
+  return $prefixes;
 }
 
 /**
