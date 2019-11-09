@@ -759,8 +759,7 @@ function forum_access_is_moderator($account, $tid = NULL) {
  * Return forum.module's forum vocabulary ID.
  */
 function _forum_access_get_vid() {
-  // TODO This variable was removed in Backdrop without replacement.
-  return variable_get('forum_nav_vocabulary', '');
+  return config_get('forum.settings', 'forum_nav_vocabulary');
 }
 
 /**

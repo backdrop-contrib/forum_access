@@ -81,7 +81,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $this->user1 = user_load(1);
     // Update uid 1's name and password so we know it.
     $password = user_password();
-    require_once BACKDROP_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
+    require_once BACKDROP_ROOT . '/' . settings_get('password_inc', 'core/includes/password.inc');
     $account = array(
       'name' => 'user1',
       'pass' => user_hash_password(trim($password)),

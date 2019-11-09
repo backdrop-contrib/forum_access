@@ -15,8 +15,7 @@ function forum_access_install() {
     ->condition('name', 'forum_access')
     ->execute();
 
-  // TODO This variable was removed in Backdrop without replacement.
-  if ($vid = variable_get('forum_nav_vocabulary', FALSE)) {
+  if ($vid = config_get('forum.settings', 'forum_nav_vocabulary')) {
     $result = db_query("SELECT t.tid FROM {taxonomy_term_data} t LEFT JOIN {forum_access} fa ON t.tid = fa.tid WHERE fa.tid IS NULL AND t.vid = :vid", array(
       ':vid' => $vid,
     ));
