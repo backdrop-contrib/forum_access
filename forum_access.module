@@ -15,7 +15,7 @@
  * Remind the user to upgrade to Chain Menu Access API 2.x.
  */
 function forum_access_requirements($phase) {
-  require_once BACKDROP_ROOT . '/includes/install.inc';
+  require_once BACKDROP_ROOT . '/core/includes/install.inc';
   $result = array();
   switch ( $phase ) {
     case 'update':
