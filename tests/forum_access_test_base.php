@@ -180,7 +180,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $this->moderator = $this->backdropCreateNamedUser('21_Moderator', array($this->create_content_rid));
 
     $anon = backdrop_anonymous_user();
-    $anon->name = check_plain(format_username($anon));
+    $anon->name = check_plain(user_format_name($anon));
     $this->accounts = array(
       $this->user1, $this->admin_user, $this->webmaster_user, $this->forum_admin_user,
       $this->edndel_any_content_user, $this->edndel_own_content_user,
