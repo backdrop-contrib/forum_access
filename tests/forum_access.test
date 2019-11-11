@@ -4,7 +4,7 @@
  * Tests for Forum Access module.
  */
 
-require_once(backdrop_get_path('module', 'forum') . '/forum.test');
+require_once(backdrop_get_path('module', 'forum') . '/tests/forum.test');
 
 /**
  * Functional tests for the Forum module, with Forum Access (and ACL) installed.
