@@ -120,7 +120,7 @@ class ForumAccess11InitialConfigurationTestCase extends ForumAccessBaseTestCase 
       }
     }
 
-    // Remove the Drupal default forum.
+    // Remove the Backdrop default forum.
     $this->backdropGet('forum/1');
     $this->assertResponse(200);
     taxonomy_term_delete(1);
@@ -128,7 +128,7 @@ class ForumAccess11InitialConfigurationTestCase extends ForumAccessBaseTestCase 
     $this->assertResponse(404);
     $this->backdropGet('forum');
     $this->assertResponse(200);
-    $this->assertText(t('No forums defined'), 'Drupal default forum removed.');
+    $this->assertText(t('No forums defined'), 'Backdrop default forum removed.');
 
     $this->pass('#########################<br />#1 - END test initial configuration @' . (time() - $this->time), '######');
   }
