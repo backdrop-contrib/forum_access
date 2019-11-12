@@ -104,23 +104,23 @@ class ForumAccessBaseTestCase extends ForumTestCase {
       $this->backdropGet('admin/config/development/devel');
       $this->assertResponse(200);
       $this->backdropPost('admin/config/development/devel', array(
-        'devel_node_access_debug_mode' => '1',
+        'debug_mode' => '1',
       ), t('Save configuration'));
       $this->assertResponse(200, 'Devel Node Access configuration saved.');
 
       // Enable the second DNA block, too.
-      $this->backdropPost('admin/structure/block/list', array(
-        'blocks[devel_node_access_dna_user][region]' => 'footer',
-      ), t('Save blocks'));
+      $layout = layout_load('default');
+      $layout->addBlock('devel_node_access', 'dna_user', 'footer');
+      $layout->save();
     }
     if (module_exists('devel')) {
       $this->backdropPost('admin/config/development/devel', array(
-        'devel_error_handlers[]' => array(1, 2, 4),
+        'devel_error_handlers[]' => array('standard', 'dpm', 'krumo'),
       ), t('Save configuration'));
       $this->assertResponse(200, 'Devel configuration saved.');
-      $this->backdropPost('admin/people/permissions/list', array(
-        '1[access devel information]' => 'access devel information',
-        '2[access devel information]' => 'access devel information',
+      $this->backdropPost('admin/config/people/permissions', array(
+        'anonymous[access devel information]' => 'access devel information',
+        'authenticated[access devel information]' => 'access devel information',
       ), t('Save permissions'));
       $this->assertResponse(200, 'Devel permissions saved.');
     }
@@ -317,6 +317,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $account->roles = $edit['roles'];
     $account->pass = $edit['pass'];
     $account->status = $edit['status'];
+    $account = entity_create('user', (array) $account);
     $account->save();
 
     $this->assertTrue(!empty($account->uid), t('User %name created, uid=%uid.', array('%name' => $edit['name'], '%uid' => $account->uid)), t('User login'));
