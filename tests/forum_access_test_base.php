@@ -497,7 +497,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
               $this->assertText($comment->subject);
               $comment->subject .= ' (updated)';
               $this->backdropPost("comment/$comment->cid/edit", array(
-                'comment_body[und][0][format]' => 'full_html',
+                'comment_body[und][0][value]' => $comment->subject,
               ), t('Save'));
               $this->assertText(t("Your comment has been posted."));  // It ought to say 'updated'!
             }
@@ -544,11 +544,11 @@ class ForumAccessBaseTestCase extends ForumTestCase {
               $this->assertText(t('Comment settings'), "$account->name sees Comment settings.");
               $this->assertText(t('Publishing options'), "$account->name sees Publishing options.");
               if (user_access('administer nodes', $account)) {
-                $this->assertText(t('Menu settings'), "$account->name sees Menu settings.");
+                $this->assertText(t('URL settings'), "$account->name sees URL settings.");
                 $this->assertText(t('Authoring information'), "$account->name sees Authoring information.");
               }
               else {
-                $this->assertNoText(t('Menu settings'), "$account->name does not see Menu settings.");
+                $this->assertNoText(t('URL settings'), "$account->name does not see URL settings.");
                 $this->assertNoText(t('Authoring information'), "$account->name does not see Authoring information.");
               }
             }
