@@ -721,7 +721,7 @@ function forum_access_access($op, $tid, $account = NULL, $administer_nodes_sees_
  */
 function forum_access_taxonomy_term_delete($term) {
   //dpm($array, "hook_taxonomy_term_delete($term->tid)");
-  if ($term->vid == _forum_access_get_vid()) {
+  if ($term->vocabulary == _forum_access_get_vid()) {
     db_delete('forum_access')
       ->condition('tid', $term->tid)
       ->execute();
@@ -733,13 +733,15 @@ function forum_access_taxonomy_term_delete($term) {
  * Implements hook_user_role_delete().
  */
 function forum_access_user_role_delete($role) {
-  db_delete('forum_access')
-    ->condition('rid', $role->rid)
-    ->execute();
-  db_delete('node_access')
-    ->condition('gid', $role->rid)
-    ->condition('realm', 'forum_access')
-    ->execute();
+  if ($role) {
+    db_delete('forum_access')
+      ->condition('rid', $role->name)
+      ->execute();
+    db_delete('node_access')
+      ->condition('gid', $role->name)
+      ->condition('realm', 'forum_access')
+      ->execute();
+  }
 }
 
 /**

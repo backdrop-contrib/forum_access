@@ -90,32 +90,33 @@ class ForumAccess11InitialConfigurationTestCase extends ForumAccessBaseTestCase 
 
     // Verify the checked state of the checkboxes.
     foreach (array($this->webmaster_rid, $this->forum_admin_rid, $this->edit_any_content_rid, $this->edit_own_content_rid, $this->create_content_rid) as $rid) {
+      $rid_checkbox = str_replace(' ', '-', $rid);
       foreach ($this->accesses as $access) {
-        $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-$access-$rid", "Role $rid does NOT have '$access'.");
+        $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-$access-$rid_checkbox", "Role $rid does NOT have '$access'.");
       }
     }
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-view-3", "administrator does NOT have 'view'.");
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-create-3", "administrator does NOT have 'create'.");
-    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-update-3", "administrator has 'update'.");
-    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-delete-3", "administrator has 'delete'.");
-    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-view-1", "anonymous has 'view'.");
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-create-1", "anonymous does NOT have 'create'.");
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-update-1", "anonymous does NOT have 'update'.");
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-delete-1", "anonymous does NOT have 'delete'.");
-    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-view-2", "authenticated has 'view'.");
-    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-create-2", "authenticated has 'create'.");
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-update-2", "authenticated does NOT have 'update'.");
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-delete-2", "authenticated does NOT have 'delete'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-view-administrator", "administrator does NOT have 'view'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-create-administrator", "administrator does NOT have 'create'.");
+    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-update-administrator", "administrator has 'update'.");
+    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-delete-administrator", "administrator has 'delete'.");
+    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-view-anonymous", "anonymous has 'view'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-create-anonymous", "anonymous does NOT have 'create'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-update-anonymous", "anonymous does NOT have 'update'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-delete-anonymous", "anonymous does NOT have 'delete'.");
+    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-view-authenticated", "authenticated has 'view'.");
+    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-create-authenticated", "authenticated has 'create'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-update-authenticated", "authenticated does NOT have 'update'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-delete-authenticated", "authenticated does NOT have 'delete'.");
 
     // Verify the enabled/disabled state of the checkboxes.
     foreach ($this->rids as $rid) {
       foreach ($this->accesses as $access) {
-        $key = "$access-$rid";
-        if (array_search($key, array('update-3', 'delete-3')) !== FALSE) {
-          $this->assertFieldDisabled("edit-forum-access-grants-checkboxes-$key"/* , "Role $rid's '$access' checkbox is disabled." */);
+        $key = "$access-" . str_replace(' ', '-', $rid);
+        if (array_search($key, array('update-administrator', 'delete-administrator')) !== FALSE) {
+          $this->assertFieldDisabled("edit-forum-access-grants-checkboxes-$key", "Role $rid's '$access' checkbox is disabled.");
         }
         else {
-          $this->assertFieldEnabled("edit-forum-access-grants-checkboxes-$key"/* , "Role $rid's '$access' checkbox is enabled." */);
+          $this->assertFieldEnabled("edit-forum-access-grants-checkboxes-$key", "Role $rid's '$access' checkbox is enabled.");
         }
       }
     }
