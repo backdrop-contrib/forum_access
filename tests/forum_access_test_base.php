@@ -373,8 +373,9 @@ class ForumAccessBaseTestCase extends ForumTestCase {
       // Retrieve the access settings for this account.
       $account->access = array();
       foreach ($account->roles as $rid => $role_name) {
+        $role_name = str_replace(' ', '-', $role_name);
         foreach ($this->accesses as $access) {
-          if ($this->isFieldChecked("edit-forum-access-grants-checkboxes-$access-$rid")) {
+          if ($this->isFieldChecked("edit-forum-access-grants-checkboxes-$access-$role_name")) {
             $account->access[$access] = $access;
           }
         }
