@@ -252,7 +252,7 @@ function forum_access_node_access_records($node) {
         }
         $grants[$tid][] = array(
           'realm' => 'forum_access',
-          'gid' => $grant->rid,
+          'gid' => _forum_access_get_hash_role_name($grant->rid),
           'grant_view' => $grant->grant_view,
           'grant_update' => $grant->grant_update,
           'grant_delete' => $grant->grant_delete,
@@ -738,10 +738,22 @@ function forum_access_user_role_delete($role) {
       ->condition('rid', $role->name)
       ->execute();
     db_delete('node_access')
-      ->condition('gid', $role->name)
+      ->condition('gid', _forum_access_get_hash_role_name($role->name))
       ->condition('realm', 'forum_access')
       ->execute();
   }
+}
+
+/**
+ * Returns a converted hash generated from the role name.
+ * The converted hash must be an integer number with 10 digits,
+ * because the 'gid' is an int(10) column in the 'node_access' table.
+ *
+ * @param $role_name
+ *   The hash is generated from this role.
+ */
+function _forum_access_get_hash_role_name($role_name) {
+  return base_convert(substr(md5($role_name), 0, 8), 16, 10);
 }
 
 /**
