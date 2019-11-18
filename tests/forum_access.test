@@ -155,6 +155,8 @@ class ForumAccess12DefaultConfigurationTestCase extends ForumAccessBaseTestCase 
       'description' => 'Default settings',
       'parent[0]' => 0,
       'weight' => '0',
+      'forum_access[grants][checkboxes][view][authenticated]' => 'authenticated',
+      'forum_access[grants][checkboxes][create][authenticated]' => 'authenticated',
     );
     $forum = (object) ($edit + array('tid' => 2));
     // Create forum.

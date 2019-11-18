@@ -451,7 +451,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
           else {
             $this->assertLinkByHref(url("comment/$comment->cid", array('fragment' => "comment-$comment->cid")));
             // Check post comment / reply link.
-            if (((!user_access('post comments', $account) && !user_access('post comments without approval', $account)) || empty($account->access['create'])) && !$is_super_user) {
+            if (((!user_access('post comments', $account) && !user_access('skip comment approval', $account)) || empty($account->access['create'])) && !$is_super_user) {
               if (!$account->uid) {
                 $this->assertLinkByHref("/user/login?destination=node/$node->nid#comment-form");
               }
@@ -576,7 +576,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
             $this->backdropPost("node/$node->nid/edit", array(
               'title' => $node->title,
             ), t('Save'));
-            $this->assertText(t('Forum topic !title has been updated.', array('!title' => $node->title)));
+            $this->assertText($node->title, "Forum topic $node->title has been updated.");
           }
 
           // Check whether we can delete the topic.
