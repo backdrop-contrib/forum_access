@@ -756,7 +756,7 @@ function forum_access_user_role_delete($role) {
  *   The hash is generated from this role.
  */
 function _forum_access_get_hash_role_name($role_name) {
-  return base_convert(substr(md5($role_name), 0, 8), 16, 10);
+  return abs(crc32($role_name));
 }
 
 /**
