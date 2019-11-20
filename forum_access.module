@@ -206,7 +206,10 @@ function forum_access_view_any_forum($account = NULL) {
  * roles as ACLs, so rids translate directly to gids.
  */
 function forum_access_node_grants($user, $op) {
-  $grants['forum_access'] = array_keys($user->roles);
+  $grants['forum_access'] = array();
+  foreach ($user->roles as $role) {
+    $grants['forum_access'][] = _forum_access_get_hash_role_name($role);
+  }
   return $grants;
 }
 
@@ -374,7 +377,7 @@ function forum_access_query_term_access_alter(QueryAlterableInterface $query) {
   // Join each one to the forum_access table.
 
   $tables = $query->getTables();
-  $rids = array_keys($account->roles);
+  $rids = $account->roles;
   foreach ($tables as $talias => $tableinfo) {
     $table = $tableinfo['table'];
     if (!($table instanceof SelectQueryInterface) && $table == 'taxonomy_term_data') {
@@ -693,7 +696,7 @@ function forum_access_access($op, $tid, $account = NULL, $administer_nodes_sees_
     $query = db_select('forum_access', 'fa')
       ->fields('fa', array('tid'))
       ->condition("fa.grant_$op", 1, '>=')
-      ->condition('fa.rid', array_keys($account->roles), 'IN');
+      ->condition('fa.rid', $account->roles, 'IN');
     if ($tid != 0) {
       $query = $query
         ->condition('fa.tid', $tid, '=');
