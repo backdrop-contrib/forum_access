@@ -180,7 +180,7 @@ function forum_access_view_any_forum($account = NULL) {
       config_set('forum_access.settings', 'forum_access_rids', $rids);
     }
     foreach ($rids as $rid) {
-      if (isset($account->roles[$rid])) {
+      if (in_array($rid, $account->roles)) {
         return $returns[$account->uid] = 1;
       }
     }
