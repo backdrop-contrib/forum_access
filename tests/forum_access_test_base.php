@@ -156,11 +156,11 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $this->webmaster_rid = $this->backdropCreateRole(array('administer blocks', 'administer forums', 'administer nodes', 'administer comments', 'administer menu', 'administer taxonomy', 'create forum content', 'access content overview', 'access administration pages', 'view revisions', 'revert revisions', 'delete revisions'), '11 webmaster');
     $this->forum_admin_rid = $this->backdropCreateRole(array('administer forums', 'create forum content', 'edit any forum content', 'delete any forum content', /* 'access content overview', 'access administration pages', */), '12 forum admin');
     $this->edndel_any_content_rid = $this->backdropCreateRole(array('create forum content', 'edit any forum content', 'delete any forum content', 'view own unpublished content'), '13 edndel any content');
-    $this->edndel_own_content_rid = $this->backdropCreateRole(array('create forum content', 'edit own forum content', 'delete own forum content', 'edit own comments'), '14 edndel own content');
+    $this->edndel_own_content_rid = $this->backdropCreateRole(array('create forum content', 'edit own forum content', 'delete own forum content', 'edit own comments', 'administer comments'), '14 edndel own content');
     $this->edit_any_content_rid = $this->backdropCreateRole(array('create forum content', 'edit any forum content', 'view own unpublished content'), '15 edit any content');
     $this->edit_own_content_rid = $this->backdropCreateRole(array('create forum content', 'edit own forum content', 'edit own comments'), '16 edit own content');
     $this->delete_any_content_rid = $this->backdropCreateRole(array('create forum content', 'delete any forum content', 'view own unpublished content'), '17 delete any content');
-    $this->delete_own_content_rid = $this->backdropCreateRole(array('create forum content', 'delete own forum content', 'edit own comments'), '18 delete own content');  // EOC should not make any difference!
+    $this->delete_own_content_rid = $this->backdropCreateRole(array('create forum content', 'delete own forum content', 'edit own comments', 'administer comments'), '18 delete own content');  // EOC should not make any difference!
     $this->create_content_rid = $this->backdropCreateRole(array('create forum content'), '19 create content');
     $this->anon_rid = BACKDROP_ANONYMOUS_ROLE;
     $this->auth_rid = BACKDROP_AUTHENTICATED_ROLE;
