@@ -486,11 +486,15 @@ function forum_access_enable_moderator($enable = TRUE) {
   if (!$enable || !user_access('administer comments')) {
     $perm = &backdrop_static('user_access');
     if ($enable) {
-      $perm[$user->uid]['administer comments'] = $enable;
+      $perm[$user->uid][] = 'administer comments';
       $user->_forum_access_moderator = $enable;
     }
     else {
-      unset($perm[$user->uid]['administer comments']);
+      foreach ($perm[$user->uid] as $key => $permission) {
+        if ($permission == 'administer comments') {
+          unset($perm[$user->uid][$key]);
+        }
+      }
       unset($user->_forum_access_moderator);
     }
   }
