@@ -277,7 +277,8 @@ function forum_access_node_access_records($node) {
  */
 function forum_access_form_alter(&$form, &$form_state, $form_id) {
   //dpm($form, "form_id($form_id)");
-  if ($form_id == 'forum_node_form' && !empty($form['#node_edit_form'])) {
+  // See this: https://api.backdropcms.org/change-records/formnode_edit_form-removed
+  if ($form_id == 'forum_node_form' && $form_state['build_info']['base_form_id'] == 'node_form') {
     _forum_access_module_load_include('node.inc');
     _forum_access_node_form($form, $form_state);
   }
