@@ -648,13 +648,13 @@ class ForumAccessBaseTestCase extends ForumTestCase {
       'weight' => '0',
     );
     $forum = (object) ($edit + array('tid' => 2));
-    $edit["forum_access[grants][checkboxes][view][1]"] = FALSE;
-    $edit["forum_access[grants][checkboxes][view][2]"] = FALSE;
-    $edit["forum_access[grants][checkboxes][create][2]"] = FALSE;
+    $edit["forum_access[grants][checkboxes][view][anonymous]"] = FALSE;
+    $edit["forum_access[grants][checkboxes][view][authenticated]"] = FALSE;
+    $edit["forum_access[grants][checkboxes][create][authenticated]"] = FALSE;
     foreach (array($this->webmaster_rid, $this->forum_admin_rid, $this->edit_any_content_rid, $this->edit_own_content_rid, $this->create_content_rid, $this->admin_rid, $this->anon_rid, $this->auth_rid) as $rid) {
       foreach ($accesses as $access) {
         $key = "$access-$rid";
-        if (array_search($key, array('update-3', 'delete-3')) === FALSE) {
+        if (array_search($key, array('update-administrator', 'delete-administrator')) === FALSE) {
           $edit["forum_access[grants][checkboxes][$access][$rid]"] = TRUE;
         }
       }
