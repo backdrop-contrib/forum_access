@@ -121,6 +121,13 @@ class ForumAccessBaseTestCase extends ForumTestCase {
       $this->backdropPost('admin/config/people/permissions', array(
         'anonymous[access devel information]' => 'access devel information',
         'authenticated[access devel information]' => 'access devel information',
+        'administrator[create forum content]' => 'create forum content',
+        'administrator[edit own forum content]' => 'edit own forum content',
+        'administrator[edit any forum content]' => 'edit any forum content',
+        'administrator[delete own forum content]' => 'delete own forum content',
+        'administrator[delete any forum content]' => 'delete any forum content',
+        'administrator[edit terms in forums]' => 'edit terms in forums',
+        'administrator[delete terms in forums]' => 'delete terms in forums',
       ), t('Save permissions'));
       $this->assertResponse(200, 'Devel permissions saved.');
     }
