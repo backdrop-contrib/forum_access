@@ -469,14 +469,16 @@ function _forum_access_forum_troubleshooting_form($is_container, $has_interferen
       '!Forum_Access' => $l('Forum Access', 'http://backdropcms.org/project/forum_access'),
       '!ACL' => $l('ACL', 'http://backdropcms.org/project/acl'),
       '%Module_interference' => t('Module interference'),
-      '!Forum_Access-dev' => $l('Forum&nbsp;Access&nbsp;7.x-1.x-dev', 'http://drupal.org/node/964638', array('html' => TRUE)),
-      '!ACL-dev' => $l('ACL&nbsp;7.x-1.x-dev', 'http://drupal.org/node/694210', array('html' => TRUE)),
-      '%devel_node_access' => 'devel_node_access',
+      '!Forum_Access-dev' => $l('Forum&nbsp;Access&nbsp;1.x-1.x-dev', 'https://github.com/backdrop-contrib/forum_access/releases', array('html' => TRUE)),
+      '!ACL-dev' => $l('ACL&nbsp;1.x-1.x-dev', 'https://github.com/backdrop-contrib/acl/releases', array('html' => TRUE)),
+      '%devel' => 'Devel',
+      '%devel_node_access' => 'Devel Node Access',
+      '!default_layout' => $l('Default Layout', 'admin/structure/layouts/manage/default'),
       '!Devel' => $l('Devel', 'http://backdropcms.org/project/devel'),
-      '!DNA' => 'DNA',
-      '!debug_mode' => $l('debug mode', 'admin/config/development/devel', array('fragment' => 'edit-devel-node-access-debug-mode')),
+      '%DNA_block' => 'Devel Node Access by User',
+      '!debug_mode' => $l('debug mode', 'admin/config/development/devel', array('fragment' => 'edit-devel-node-access')),
       '!block' => $l('block', 'admin/structure/block/list'),
-      '!dna_summary' => $l('devel/node_access/summary', 'devel/node_access/summary'),
+      '!dna_summary' => $l('admin/devel/node_access/summary', 'admin/devel/node_access/summary'),
       '!Rebuild_permissions' => $l($tr('Rebuild permissions'), 'admin/reports/status/rebuild'),
       '!Forum_Access_' => $l('Forum Access', 'https://github.com/backdrop-contrib/forum_access/issues'),
       '!ACL_' => $l('ACL', 'https://github.com/backdrop-contrib/acl/issues'),
@@ -493,8 +495,8 @@ function _forum_access_forum_troubleshooting_form($is_container, $has_interferen
                               t("Update to the 'recommended' !Forum_Access and !ACL releases for your version of Backdrop.", $variables) . '</li><li>' .
         ($has_interference ?  t("Read %Module_interference above and update your other node access modules.", $variables) . '</li><li>' : '') .
                               t("Check the release notes of the development snapshots for issues that might have been fixed in !Forum_Access-dev or !ACL-dev since the latest release.", $variables) . '</li><li>' .
-                              t("Install the %devel_node_access module (!DNA, part of the !Devel module) and enable its !debug_mode: !DNA will show you all the grants that actually control your nodes in a footer block on each node's page.", $variables) . '</li><li>' .
-                              t("Additional insight can be gained from !dna_summary and by enabling the second !DNA !block.", $variables) . '</li><li>' .
+                              t("Install the %devel and the %devel_node_access modules (DNA, part of the !Devel module), enable its !debug_mode, and add the %devel_node_access block to the !default_layout: DNA will show you all the grants that actually control your nodes on each node's page.", $variables) . '</li><li>' .
+                              t("Additional insight can be gained from !dna_summary and by adding the %DNA_block block to the !default_layout.", $variables) . '</li><li>' .
                               t("!Rebuild_permissions and check DNA for changes.", $variables) . '</li><li>' .
                               t("Check the issues queues of !Forum_Access_ and !ACL_ for existing reports and possible solutions.", $variables) . '</li><li>' .
                               t("If all of this hasn't helped, then pick ONE node that is misbehaving, look at it using an account that can see the node (and that should NOT have access if that's your problem!), create a new issue in the issues queue, describe the problem... <ul><li> what did you do? </li><li> what did you expect? </li><li> what happened instead? </li></ul> ... and <strong>attach a screenshot of all the DNA records</strong> for that one node. <br /> Be sure to indicate paths (URLs) for every page and module that you mention.") . '</li></ol><br />' .
@@ -510,7 +512,7 @@ function _forum_access_permission_link($module, $permission, $prefix = '', $post
     $permissions[$module] = module_invoke($module, 'permission');
   }
   $key = '!' . str_replace(' ', '_', $permission);
-  $value = $prefix . l($permissions[$module][$permission]['title'], 'admin/people/permissions', array('fragment' => "module-$module", 'html' => TRUE)) . $postfix;
+  $value = $prefix . l($permissions[$module][$permission]['title'], 'admin/config/people/permissions', array('fragment' => "module-$module", 'html' => TRUE)) . $postfix;
   return array($key => $value);
 }
 
