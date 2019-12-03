@@ -15,9 +15,8 @@ function forum_access_install() {
     ->condition('name', 'forum_access')
     ->execute();
 
-  // TODO This variable was removed in Backdrop without replacement.
-  if ($vid = variable_get('forum_nav_vocabulary', FALSE)) {
-    $result = db_query("SELECT t.tid FROM {taxonomy_term_data} t LEFT JOIN {forum_access} fa ON t.tid = fa.tid WHERE fa.tid IS NULL AND t.vid = :vid", array(
+  if ($vid = config_get('forum.settings', 'forum_nav_vocabulary')) {
+    $result = db_query("SELECT t.tid FROM {taxonomy_term_data} t LEFT JOIN {forum_access} fa ON t.tid = fa.tid WHERE fa.tid IS NULL AND t.vocabulary = :vid", array(
       ':vid' => $vid,
     ));
     $grant_create_by_rid = array(
@@ -62,9 +61,10 @@ function forum_access_schema() {
       ),
       'rid' => array(
         'description' => 'The {role}.rid to which this {forum_access} entry applies.',
-        'type' => 'int',
+        'type' => 'varchar',
+        'length' => 64,
         'not null' => TRUE,
-        'default' => 0,
+        'default' => '',
       ),
       'grant_view' => array(
         'description' => 'Whether to grant "view" permission.',
@@ -130,7 +130,7 @@ function forum_access_enable() {
  * Adds missing default records to the {forum_acces} table.
  */
 function _forum_access_update_table() {
-  $tids = db_query("SELECT td.tid FROM {taxonomy_term_data} td LEFT JOIN {forum_access} fa ON td.tid = fa.tid WHERE td.vid = :vid AND fa.tid IS NULL", array(
+  $tids = db_query("SELECT td.tid FROM {taxonomy_term_data} td LEFT JOIN {forum_access} fa ON td.tid = fa.tid WHERE td.vocabulary = :vid AND fa.tid IS NULL", array(
     'vid' => _forum_access_get_vid(),
   ))->fetchCol();
   foreach ($tids as $tid) {
@@ -173,55 +173,4 @@ function forum_access_uninstall() {
   config_clear('forum_access.settings', 'forum_access_provide_moderators_template_variable');
   config_clear('forum_access.settings', 'forum_access_rids');
   config_clear('forum_access.settings', 'forum_access_update_limit');
-}
-
-/**
- * @todo Please document this function.
- * @see http://drupal.org/node/1354
- */
-function forum_access_update_last_removed() {
-  return 6105;
-}
-
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function forum_access_update_6106() { }
-
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function forum_access_update_7001() { }
-
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function forum_access_update_7002() { }
-
-/**
- * Implements hook_update_last_removed().
- */
-function forum_access_update_last_removed() {
-  return 7002;
-}
-
-/**
- * Implements hook_update_N().
- */
-function forum_access_update_1000() {
-  $config = config('forum_access.settings');
-  $config->set('forum_access_default_template_tid', update_variable_get('forum_access_default_template_tid', 'novalue'));
-  $config->set('forum_access_new_template_tid', update_variable_get('forum_access_new_template_tid', 'novalue'));
-  $config->set('forum_access_update_limit', update_variable_get('forum_access_update_limit', '20'));
-  $config->set('forum_access_batch_threshold', update_variable_get('forum_access_batch_threshold', 'dynamic value in file /forum_access/forum_access.admin.inc line 58'));
-  $config->set('forum_access_moderator_rid', update_variable_get('forum_access_moderator_rid', 'NULL'));
-  $config->set('forum_access_rids', update_variable_get('forum_access_rids', 'NULL'));
-  $config->set('forum_access_provide_moderators_template_variable', update_variable_get('forum_access_provide_moderators_template_variable', 'FALSE'));
-  $config->set('forum_access_allowed_comment_links_for_op', update_variable_get('forum_access_allowed_comment_links_for_op', 'dynamic variable in file /forum_access/forum_access.node.inc line 64'));
-  $config->set('forum_access_allowed_node_edit_options', update_variable_get('forum_access_allowed_node_edit_options', 'dynamic value in file /forum_access/forum_access.node.inc line 160'));
-  $config->set('forum_access_allowed_comment_edit_administration_elements', update_variable_get('forum_access_allowed_comment_edit_administration_elements', 'dynamic value in file /forum_access/forum_access.node.inc line 212'));
-  update_variable_del('forum_access_default_template_tid');
-  update_variable_del('forum_access_new_template_tid');
-  update_variable_del('forum_access_update_limit');
-  update_variable_del('forum_access_batch_threshold');
-  update_variable_del('forum_access_moderator_rid');
-  update_variable_del('forum_access_rids');
-  update_variable_del('forum_access_provide_moderators_template_variable');
-  update_variable_del('forum_access_allowed_comment_links_for_op');
-  update_variable_del('forum_access_allowed_node_edit_options');
-  update_variable_del('forum_access_allowed_comment_edit_administration_elements');
 }

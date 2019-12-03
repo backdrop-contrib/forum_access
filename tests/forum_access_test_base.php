@@ -81,7 +81,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $this->user1 = user_load(1);
     // Update uid 1's name and password so we know it.
     $password = user_password();
-    require_once BACKDROP_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
+    require_once BACKDROP_ROOT . '/' . settings_get('password_inc', 'core/includes/password.inc');
     $account = array(
       'name' => 'user1',
       'pass' => user_hash_password(trim($password)),
@@ -104,23 +104,30 @@ class ForumAccessBaseTestCase extends ForumTestCase {
       $this->backdropGet('admin/config/development/devel');
       $this->assertResponse(200);
       $this->backdropPost('admin/config/development/devel', array(
-        'devel_node_access_debug_mode' => '1',
+        'debug_mode' => '1',
       ), t('Save configuration'));
       $this->assertResponse(200, 'Devel Node Access configuration saved.');
 
       // Enable the second DNA block, too.
-      $this->backdropPost('admin/structure/block/list', array(
-        'blocks[devel_node_access_dna_user][region]' => 'footer',
-      ), t('Save blocks'));
+      $layout = layout_load('default');
+      $layout->addBlock('devel_node_access', 'dna_user', 'footer');
+      $layout->save();
     }
     if (module_exists('devel')) {
       $this->backdropPost('admin/config/development/devel', array(
-        'devel_error_handlers[]' => array(1, 2, 4),
+        'devel_error_handlers[]' => array('standard', 'dpm', 'krumo'),
       ), t('Save configuration'));
       $this->assertResponse(200, 'Devel configuration saved.');
-      $this->backdropPost('admin/people/permissions/list', array(
-        '1[access devel information]' => 'access devel information',
-        '2[access devel information]' => 'access devel information',
+      $this->backdropPost('admin/config/people/permissions', array(
+        'anonymous[access devel information]' => 'access devel information',
+        'authenticated[access devel information]' => 'access devel information',
+        'administrator[create forum content]' => 'create forum content',
+        'administrator[edit own forum content]' => 'edit own forum content',
+        'administrator[edit any forum content]' => 'edit any forum content',
+        'administrator[delete own forum content]' => 'delete own forum content',
+        'administrator[delete any forum content]' => 'delete any forum content',
+        'administrator[edit terms in forums]' => 'edit terms in forums',
+        'administrator[delete terms in forums]' => 'delete terms in forums',
       ), t('Save permissions'));
       $this->assertResponse(200, 'Devel permissions saved.');
     }
@@ -134,9 +141,9 @@ class ForumAccessBaseTestCase extends ForumTestCase {
 
       Remove these users and roles and create the ones we need.
     */
-    user_role_delete((int) reset($this->admin_user->roles));
-    user_role_delete((int) reset($this->edit_any_topics_user->roles));
-    user_role_delete((int) reset($this->edit_own_topics_user->roles));
+    user_role_delete(reset($this->admin_user->roles));
+    user_role_delete(reset($this->edit_any_topics_user->roles));
+    user_role_delete(reset($this->edit_own_topics_user->roles));
     user_delete($this->admin_user->uid);
     user_delete($this->edit_any_topics_user->uid);
     user_delete($this->edit_own_topics_user->uid);
@@ -145,23 +152,23 @@ class ForumAccessBaseTestCase extends ForumTestCase {
 
     // Get rids and uids up to 10/9.
     for ($i = 0; $i < 3; ++$i) {
-      $dummy_rid = (int) $this->backdropCreateRole(array(), 'dummy');
+      $dummy_rid = $this->backdropCreateRole(array(), 'dummy');
       $dummy_user = $this->backdropCreateNamedUser('Dummy', array($dummy_rid));
       user_role_delete($dummy_rid);
       user_delete($dummy_user->uid);
     }
 
     // Create our roles.
-    $this->admin_rid = 3;
-    $this->webmaster_rid = (int) $this->backdropCreateRole(array('administer blocks', 'administer forums', 'administer nodes', 'administer comments', 'administer menu', 'administer taxonomy', 'create forum content', 'access content overview', 'access administration pages', 'view revisions', 'revert revisions', 'delete revisions'), '11 webmaster');
-    $this->forum_admin_rid = (int) $this->backdropCreateRole(array('administer forums', 'create forum content', 'edit any forum content', 'delete any forum content', /* 'access content overview', 'access administration pages', */), '12 forum admin');
-    $this->edndel_any_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'edit any forum content', 'delete any forum content', 'view own unpublished content'), '13 edndel any content');
-    $this->edndel_own_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'edit own forum content', 'delete own forum content'), '14 edndel own content');
-    $this->edit_any_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'edit any forum content', 'view own unpublished content'), '15 edit any content');
-    $this->edit_own_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'edit own forum content', 'edit own comments'), '16 edit own content');
-    $this->delete_any_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'delete any forum content', 'view own unpublished content'), '17 delete any content');
-    $this->delete_own_content_rid = (int) $this->backdropCreateRole(array('create forum content', 'delete own forum content', 'edit own comments'), '18 delete own content');  // EOC should not make any difference!
-    $this->create_content_rid = (int) $this->backdropCreateRole(array('create forum content'), '19 create content');
+    $this->admin_rid = 'administrator';
+    $this->webmaster_rid = $this->backdropCreateRole(array('administer blocks', 'administer forums', 'administer nodes', 'administer comments', 'administer menu', 'administer taxonomy', 'create forum content', 'access content overview', 'access administration pages', 'view revisions', 'revert revisions', 'delete revisions', 'administer url aliases'), '11 webmaster');
+    $this->forum_admin_rid = $this->backdropCreateRole(array('administer forums', 'create forum content', 'edit any forum content', 'delete any forum content', /* 'access content overview', 'access administration pages', */), '12 forum admin');
+    $this->edndel_any_content_rid = $this->backdropCreateRole(array('create forum content', 'edit any forum content', 'delete any forum content', 'view own unpublished content'), '13 edndel any content');
+    $this->edndel_own_content_rid = $this->backdropCreateRole(array('create forum content', 'edit own forum content', 'delete own forum content', 'edit own comments'), '14 edndel own content');
+    $this->edit_any_content_rid = $this->backdropCreateRole(array('create forum content', 'edit any forum content', 'view own unpublished content'), '15 edit any content');
+    $this->edit_own_content_rid = $this->backdropCreateRole(array('create forum content', 'edit own forum content', 'edit own comments'), '16 edit own content');
+    $this->delete_any_content_rid = $this->backdropCreateRole(array('create forum content', 'delete any forum content', 'view own unpublished content'), '17 delete any content');
+    $this->delete_own_content_rid = $this->backdropCreateRole(array('create forum content', 'delete own forum content', 'edit own comments'), '18 delete own content');  // EOC should not make any difference!
+    $this->create_content_rid = $this->backdropCreateRole(array('create forum content'), '19 create content');
     $this->anon_rid = BACKDROP_ANONYMOUS_ROLE;
     $this->auth_rid = BACKDROP_AUTHENTICATED_ROLE;
 
@@ -180,7 +187,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $this->moderator = $this->backdropCreateNamedUser('21_Moderator', array($this->create_content_rid));
 
     $anon = backdrop_anonymous_user();
-    $anon->name = check_plain(format_username($anon));
+    $anon->name = check_plain(user_format_name($anon));
     $this->accounts = array(
       $this->user1, $this->admin_user, $this->webmaster_user, $this->forum_admin_user,
       $this->edndel_any_content_user, $this->edndel_own_content_user,
@@ -195,7 +202,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
       $this->delete_any_content_rid, $this->delete_own_content_rid, $this->create_content_rid,
     );
     // Show settings for reference.
-    $this->backdropGet('admin/people/permissions/list');
+    $this->backdropGet('admin/config/people/permissions');
     $this->assertResponse(200, '^^^ Permissions');
     $this->backdropGet('admin/people', array('query' => array('sort' => 'asc', 'order' => backdrop_encode_path(t('Username')))));
     $this->assertResponse(200, '^^^ Users');
@@ -311,7 +318,14 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $edit['pass']   = user_password();
     $edit['status'] = 1;
 
-    $account = user_save(backdrop_anonymous_user(), $edit);
+    $account = backdrop_anonymous_user();
+    $account->name = $edit['name'];
+    $account->mail = $edit['mail'];
+    $account->roles = $edit['roles'];
+    $account->pass = $edit['pass'];
+    $account->status = $edit['status'];
+    $account = entity_create('user', (array) $account);
+    $account->save();
 
     $this->assertTrue(!empty($account->uid), t('User %name created, uid=%uid.', array('%name' => $edit['name'], '%uid' => $account->uid)), t('User login'));
     if (empty($account->uid)) {
@@ -366,8 +380,9 @@ class ForumAccessBaseTestCase extends ForumTestCase {
       // Retrieve the access settings for this account.
       $account->access = array();
       foreach ($account->roles as $rid => $role_name) {
+        $role_name = str_replace(' ', '-', $role_name);
         foreach ($this->accesses as $access) {
-          if ($this->isFieldChecked("edit-forum-access-grants-checkboxes-$access-$rid")) {
+          if ($this->isFieldChecked("edit-forum-access-grants-checkboxes-$access-$role_name")) {
             $account->access[$access] = $access;
           }
         }
@@ -443,7 +458,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
           else {
             $this->assertLinkByHref(url("comment/$comment->cid", array('fragment' => "comment-$comment->cid")));
             // Check post comment / reply link.
-            if (((!user_access('post comments', $account) && !user_access('post comments without approval', $account)) || empty($account->access['create'])) && !$is_super_user) {
+            if (((!user_access('post comments', $account) && !user_access('skip comment approval', $account)) || empty($account->access['create'])) && !$is_super_user) {
               if (!$account->uid) {
                 $this->assertLinkByHref("/user/login?destination=node/$node->nid#comment-form");
               }
@@ -458,7 +473,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
               $this->assertResponse(403);
             }
             else {
-              $this->assertText(t('Add new comment'));
+              $this->assertText(t('Add comment'));
               $this->assertLink(t('reply'));
               $this->assertLinkByHref("comment/reply/$node->nid/$comment->cid");
               $this->backdropGet("comment/reply/$node->nid/$comment->cid");
@@ -490,7 +505,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
               $this->assertText($comment->subject);
               $comment->subject .= ' (updated)';
               $this->backdropPost("comment/$comment->cid/edit", array(
-                'subject' => $comment->subject,
+                'comment_body[und][0][value]' => $comment->subject,
               ), t('Save'));
               $this->assertText(t("Your comment has been posted."));  // It ought to say 'updated'!
             }
@@ -502,7 +517,10 @@ class ForumAccessBaseTestCase extends ForumTestCase {
               $this->backdropGet("comment/$comment->cid/delete");
               $this->assertResponse(403);
             }
-            else {
+            elseif (!in_array($account->name, array('14_EdNDel_own_content', '18_Delete_own_content'))) {
+              // Deleting comment requires 'administer comments' permission in Backdrop.
+              // User "14_EdNDel_own_content" hasn't got 'administer comments' permission.
+              // User "18_Delete_own" hasn't got 'administer comments' permission.
               $this->assertText($comment->subject);
               $this->assertLink(t('delete'));
               $this->clickLink(t('delete'));
@@ -537,11 +555,11 @@ class ForumAccessBaseTestCase extends ForumTestCase {
               $this->assertText(t('Comment settings'), "$account->name sees Comment settings.");
               $this->assertText(t('Publishing options'), "$account->name sees Publishing options.");
               if (user_access('administer nodes', $account)) {
-                $this->assertText(t('Menu settings'), "$account->name sees Menu settings.");
+                $this->assertText(t('URL settings'), "$account->name sees URL settings.");
                 $this->assertText(t('Authoring information'), "$account->name sees Authoring information.");
               }
               else {
-                $this->assertNoText(t('Menu settings'), "$account->name does not see Menu settings.");
+                $this->assertNoText(t('URL settings'), "$account->name does not see URL settings.");
                 $this->assertNoText(t('Authoring information'), "$account->name does not see Authoring information.");
               }
             }
@@ -549,7 +567,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
               $this->assertNoText(t('Revision information'), "$account->name does not see Revision information.");
               $this->assertNoText(t('Comment settings'), "$account->name does not see Comment settings.");
               $this->assertNoText(t('Publishing options'), "$account->name does not see Publishing options.");
-              $this->assertNoText(t('Menu settings'), "$account->name does not see Menu settings.");
+              $this->assertNoText(t('URL settings'), "$account->name does not see URL settings.");
               $this->assertNoText(t('Authoring information'), "$account->name does not see Authoring information.");
             }
 
@@ -560,7 +578,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
               $this->assertNoButton(t('Delete'), 0, $account->name . ' has no Delete button.');
             }
             else {
-              $this->assertButton(t('Delete'), 0, $account->name . ' has a Delete button.');
+              $this->assertLink(t('Delete'));
             }
 
             // Change the title.
@@ -568,7 +586,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
             $this->backdropPost("node/$node->nid/edit", array(
               'title' => $node->title,
             ), t('Save'));
-            $this->assertText(t('Forum topic !title has been updated.', array('!title' => $node->title)));
+            $this->assertText($node->title, "Forum topic $node->title has been updated.");
           }
 
           // Check whether we can delete the topic.
@@ -638,13 +656,13 @@ class ForumAccessBaseTestCase extends ForumTestCase {
       'weight' => '0',
     );
     $forum = (object) ($edit + array('tid' => 2));
-    $edit["forum_access[grants][checkboxes][view][1]"] = FALSE;
-    $edit["forum_access[grants][checkboxes][view][2]"] = FALSE;
-    $edit["forum_access[grants][checkboxes][create][2]"] = FALSE;
+    $edit["forum_access[grants][checkboxes][view][anonymous]"] = FALSE;
+    $edit["forum_access[grants][checkboxes][view][authenticated]"] = FALSE;
+    $edit["forum_access[grants][checkboxes][create][authenticated]"] = FALSE;
     foreach (array($this->webmaster_rid, $this->forum_admin_rid, $this->edit_any_content_rid, $this->edit_own_content_rid, $this->create_content_rid, $this->admin_rid, $this->anon_rid, $this->auth_rid) as $rid) {
       foreach ($accesses as $access) {
         $key = "$access-$rid";
-        if (array_search($key, array('update-3', 'delete-3')) === FALSE) {
+        if (array_search($key, array('update-administrator', 'delete-administrator')) === FALSE) {
           $edit["forum_access[grants][checkboxes][$access][$rid]"] = TRUE;
         }
       }

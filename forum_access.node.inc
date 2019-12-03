@@ -99,7 +99,7 @@ function _forum_access_node_form(&$form, &$form_state) {
     return;
   }
 
-  $roles = array_keys($user->roles);
+  $roles = $user->roles;
   $tids = array();
   $result = db_query("SELECT tid FROM {forum_access} WHERE rid IN (:roles) AND grant_create = 1", array(
     ':roles' => $roles,

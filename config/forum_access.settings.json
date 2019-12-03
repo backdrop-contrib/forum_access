@@ -3,11 +3,28 @@
     "forum_access_default_template_tid": "novalue",
     "forum_access_new_template_tid": "novalue",
     "forum_access_update_limit": "20",
-    "forum_access_batch_threshold": "dynamic value in file /forum_access/forum_access.admin.inc line 58",
+    "forum_access_batch_threshold": "20",
     "forum_access_moderator_rid": "NULL",
     "forum_access_rids": "NULL",
     "forum_access_provide_moderators_template_variable": "FALSE",
-    "forum_access_allowed_comment_links_for_op": "dynamic variable in file /forum_access/forum_access.node.inc line 64",
-    "forum_access_allowed_node_edit_options": "dynamic value in file /forum_access/forum_access.node.inc line 160",
-    "forum_access_allowed_comment_edit_administration_elements": "dynamic value in file /forum_access/forum_access.node.inc line 212"
+    "forum_access_allowed_comment_links_for_create": [
+        "comment-reply"
+    ],
+    "forum_access_allowed_comment_links_for_update": [
+        "comment-edit",
+        "comment-approve"
+    ],
+    "forum_access_allowed_comment_links_for_delete": [
+        "comment-delete"
+    ],
+    "forum_access_allowed_node_edit_options": [
+        "status",
+        "sticky",
+        "subscriptions_notify"
+    ],
+    "forum_access_allowed_comment_edit_administration_elements": [
+        "homepage",
+        "status",
+        "subscriptions_notify"
+    ]
 }

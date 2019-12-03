@@ -15,7 +15,7 @@
  * Remind the user to upgrade to Chain Menu Access API 2.x.
  */
 function forum_access_requirements($phase) {
-  require_once BACKDROP_ROOT . '/includes/install.inc';
+  require_once BACKDROP_ROOT . '/core/includes/install.inc';
   $result = array();
   switch ( $phase ) {
     case 'update':
@@ -146,9 +146,10 @@ function _forum_access_comment_access_callback($comment, $op) {
  */
 function forum_access_config_info() {
   $prefixes['forum_access.settings'] = array(
-    'label' => t('Module name settings'),
+    'label' => t('Forum Access settings'),
     'group' => t('Configuration'),
   );
+  return $prefixes;
 }
 
 /**
@@ -179,7 +180,7 @@ function forum_access_view_any_forum($account = NULL) {
       config_set('forum_access.settings', 'forum_access_rids', $rids);
     }
     foreach ($rids as $rid) {
-      if (isset($account->roles[$rid])) {
+      if (in_array($rid, $account->roles)) {
         return $returns[$account->uid] = 1;
       }
     }
@@ -205,7 +206,10 @@ function forum_access_view_any_forum($account = NULL) {
  * roles as ACLs, so rids translate directly to gids.
  */
 function forum_access_node_grants($user, $op) {
-  $grants['forum_access'] = array_keys($user->roles);
+  $grants['forum_access'] = array();
+  foreach ($user->roles as $role) {
+    $grants['forum_access'][] = _forum_access_get_hash_role_name($role);
+  }
   return $grants;
 }
 
@@ -251,7 +255,7 @@ function forum_access_node_access_records($node) {
         }
         $grants[$tid][] = array(
           'realm' => 'forum_access',
-          'gid' => $grant->rid,
+          'gid' => _forum_access_get_hash_role_name($grant->rid),
           'grant_view' => $grant->grant_view,
           'grant_update' => $grant->grant_update,
           'grant_delete' => $grant->grant_delete,
@@ -273,7 +277,8 @@ function forum_access_node_access_records($node) {
  */
 function forum_access_form_alter(&$form, &$form_state, $form_id) {
   //dpm($form, "form_id($form_id)");
-  if ($form_id == 'forum_node_form' && !empty($form['#node_edit_form'])) {
+  // See this: https://api.backdropcms.org/change-records/formnode_edit_form-removed
+  if ($form_id == 'forum_node_form' && $form_state['build_info']['base_form_id'] == 'node_form') {
     _forum_access_module_load_include('node.inc');
     _forum_access_node_form($form, $form_state);
   }
@@ -373,7 +378,7 @@ function forum_access_query_term_access_alter(QueryAlterableInterface $query) {
   // Join each one to the forum_access table.
 
   $tables = $query->getTables();
-  $rids = array_keys($account->roles);
+  $rids = $account->roles;
   foreach ($tables as $talias => $tableinfo) {
     $table = $tableinfo['table'];
     if (!($table instanceof SelectQueryInterface) && $table == 'taxonomy_term_data') {
@@ -482,11 +487,15 @@ function forum_access_enable_moderator($enable = TRUE) {
   if (!$enable || !user_access('administer comments')) {
     $perm = &backdrop_static('user_access');
     if ($enable) {
-      $perm[$user->uid]['administer comments'] = $enable;
+      $perm[$user->uid][] = 'administer comments';
       $user->_forum_access_moderator = $enable;
     }
     else {
-      unset($perm[$user->uid]['administer comments']);
+      foreach ($perm[$user->uid] as $key => $permission) {
+        if ($permission == 'administer comments') {
+          unset($perm[$user->uid][$key]);
+        }
+      }
       unset($user->_forum_access_moderator);
     }
   }
@@ -692,7 +701,7 @@ function forum_access_access($op, $tid, $account = NULL, $administer_nodes_sees_
     $query = db_select('forum_access', 'fa')
       ->fields('fa', array('tid'))
       ->condition("fa.grant_$op", 1, '>=')
-      ->condition('fa.rid', array_keys($account->roles), 'IN');
+      ->condition('fa.rid', $account->roles, 'IN');
     if ($tid != 0) {
       $query = $query
         ->condition('fa.tid', $tid, '=');
@@ -720,7 +729,7 @@ function forum_access_access($op, $tid, $account = NULL, $administer_nodes_sees_
  */
 function forum_access_taxonomy_term_delete($term) {
   //dpm($array, "hook_taxonomy_term_delete($term->tid)");
-  if ($term->vid == _forum_access_get_vid()) {
+  if ($term->vocabulary == _forum_access_get_vid()) {
     db_delete('forum_access')
       ->condition('tid', $term->tid)
       ->execute();
@@ -732,13 +741,27 @@ function forum_access_taxonomy_term_delete($term) {
  * Implements hook_user_role_delete().
  */
 function forum_access_user_role_delete($role) {
-  db_delete('forum_access')
-    ->condition('rid', $role->rid)
-    ->execute();
-  db_delete('node_access')
-    ->condition('gid', $role->rid)
-    ->condition('realm', 'forum_access')
-    ->execute();
+  if ($role) {
+    db_delete('forum_access')
+      ->condition('rid', $role->name)
+      ->execute();
+    db_delete('node_access')
+      ->condition('gid', _forum_access_get_hash_role_name($role->name))
+      ->condition('realm', 'forum_access')
+      ->execute();
+  }
+}
+
+/**
+ * Returns a converted hash generated from the role name.
+ * The converted hash must be an integer number with 10 digits,
+ * because the 'gid' is an int(10) column in the 'node_access' table.
+ *
+ * @param $role_name
+ *   The hash is generated from this role.
+ */
+function _forum_access_get_hash_role_name($role_name) {
+  return abs(crc32($role_name));
 }
 
 /**
@@ -759,8 +782,7 @@ function forum_access_is_moderator($account, $tid = NULL) {
  * Return forum.module's forum vocabulary ID.
  */
 function _forum_access_get_vid() {
-  // TODO This variable was removed in Backdrop without replacement.
-  return variable_get('forum_nav_vocabulary', '');
+  return config_get('forum.settings', 'forum_nav_vocabulary');
 }
 
 /**

@@ -1,14 +1,6 @@
 
 # Forum Access
 
-This is module has been partially ported from Drupal 7 to Backdrop CMS,
-but it is not yet functional. Please, feel free to help by testing,
-reporting issues, and/or creating pull requests.
-
-New maintainers are welcome.
-
-## Overview
-
 Forum Access changes your forum administration pages to let you apply
 role-based permissions to each forum, and to give each forum individual
 moderators.
@@ -20,8 +12,11 @@ including edit and delete.
 
 Forum Access requires the current versions of the following modules:
 
+- Forum <https://backdropcms.org/project/forum>
 - ACL <https://backdropcms.org/project/acl>
 - Chain Menu Access API <https://backdropcms.org/project/chain_menu_access>
+
+(If this [patch](https://github.com/backdrop-contrib/forum/commit/77570c8d17cfdab1ffcf67578688db289507d577) is not yet in the Forum module, then you have to apply it.)
 
 ## Permissions
 
@@ -66,11 +61,17 @@ Ported to Drupal 6 and 7 and maintained by salvis.
 A full list of contributors can be found at:
 https://www.drupal.org/node/87986/committers
 
-### Temporary Maintainers
+### Current Maintainers
 
+- Attila Vasas (https://github.com/vasasa).
 - Tim Erickson (https://github.com/stpaultim).
+- Seeking additional maintainers.
 
 ## License
 
 This project is GPL v2 software. See the LICENSE.txt file in this directory for
 complete text.
+
+## Screenshot
+
+![Forum Access screenshot](https://github.com/backdrop-contrib/forum_access/blob/1.x-1.x/images/screenshot.png)

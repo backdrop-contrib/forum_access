@@ -4,20 +4,12 @@
  * Tests for Forum Access module.
  */
 
-require_once(backdrop_get_path('module', 'forum') . '/forum.test');
+require_once(backdrop_get_path('module', 'forum') . '/tests/forum.test');
 
 /**
  * Functional tests for the Forum module, with Forum Access (and ACL) installed.
  */
 class ForumAccess00PlainTestCase extends ForumTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => '0. Forum functionality (with FA and ACL)',
-      'description' => 'Run the Forum (!) module tests with Forum Access (and ACL) installed.',
-      'group' => 'Forum Access',
-    );
-  }
 
   /**
    * Implements setUp().
@@ -72,14 +64,6 @@ require_once(backdrop_get_path('module', 'forum_access') . '/tests/forum_access_
  */
 class ForumAccess11InitialConfigurationTestCase extends ForumAccessBaseTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => '1. Forum Access Initial Configuration',
-      'description' => 'Display and verify the initial configuration for all ensuing tests (roles, permissions, users, Forum Access default settings in a new forum).',
-      'group' => 'Forum Access',
-    );
-  }
-
   function testInitialConfiguration() {
     $this->setUp2();
     $this->pass('#########################<br />#1 - START test initial configuration @' . (time() - $this->time), '######');
@@ -106,37 +90,38 @@ class ForumAccess11InitialConfigurationTestCase extends ForumAccessBaseTestCase 
 
     // Verify the checked state of the checkboxes.
     foreach (array($this->webmaster_rid, $this->forum_admin_rid, $this->edit_any_content_rid, $this->edit_own_content_rid, $this->create_content_rid) as $rid) {
+      $rid_checkbox = str_replace(' ', '-', $rid);
       foreach ($this->accesses as $access) {
-        $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-$access-$rid", "Role $rid does NOT have '$access'.");
+        $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-$access-$rid_checkbox", "Role $rid does NOT have '$access'.");
       }
     }
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-view-3", "administrator does NOT have 'view'.");
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-create-3", "administrator does NOT have 'create'.");
-    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-update-3", "administrator has 'update'.");
-    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-delete-3", "administrator has 'delete'.");
-    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-view-1", "anonymous has 'view'.");
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-create-1", "anonymous does NOT have 'create'.");
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-update-1", "anonymous does NOT have 'update'.");
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-delete-1", "anonymous does NOT have 'delete'.");
-    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-view-2", "authenticated has 'view'.");
-    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-create-2", "authenticated has 'create'.");
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-update-2", "authenticated does NOT have 'update'.");
-    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-delete-2", "authenticated does NOT have 'delete'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-view-administrator", "administrator does NOT have 'view'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-create-administrator", "administrator does NOT have 'create'.");
+    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-update-administrator", "administrator has 'update'.");
+    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-delete-administrator", "administrator has 'delete'.");
+    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-view-anonymous", "anonymous has 'view'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-create-anonymous", "anonymous does NOT have 'create'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-update-anonymous", "anonymous does NOT have 'update'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-delete-anonymous", "anonymous does NOT have 'delete'.");
+    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-view-authenticated", "authenticated has 'view'.");
+    $this->assertFieldChecked(  "edit-forum-access-grants-checkboxes-create-authenticated", "authenticated has 'create'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-update-authenticated", "authenticated does NOT have 'update'.");
+    $this->assertNoFieldChecked("edit-forum-access-grants-checkboxes-delete-authenticated", "authenticated does NOT have 'delete'.");
 
     // Verify the enabled/disabled state of the checkboxes.
     foreach ($this->rids as $rid) {
       foreach ($this->accesses as $access) {
-        $key = "$access-$rid";
-        if (array_search($key, array('update-3', 'delete-3')) !== FALSE) {
-          $this->assertFieldDisabled("edit-forum-access-grants-checkboxes-$key"/* , "Role $rid's '$access' checkbox is disabled." */);
+        $key = "$access-" . str_replace(' ', '-', $rid);
+        if (array_search($key, array('update-administrator', 'delete-administrator')) !== FALSE) {
+          $this->assertFieldDisabled("edit-forum-access-grants-checkboxes-$key", "Role $rid's '$access' checkbox is disabled.");
         }
         else {
-          $this->assertFieldEnabled("edit-forum-access-grants-checkboxes-$key"/* , "Role $rid's '$access' checkbox is enabled." */);
+          $this->assertFieldEnabled("edit-forum-access-grants-checkboxes-$key", "Role $rid's '$access' checkbox is enabled.");
         }
       }
     }
 
-    // Remove the Drupal default forum.
+    // Remove the Backdrop default forum.
     $this->backdropGet('forum/1');
     $this->assertResponse(200);
     taxonomy_term_delete(1);
@@ -144,7 +129,7 @@ class ForumAccess11InitialConfigurationTestCase extends ForumAccessBaseTestCase 
     $this->assertResponse(404);
     $this->backdropGet('forum');
     $this->assertResponse(200);
-    $this->assertText(t('No forums defined'), 'Drupal default forum removed.');
+    $this->assertText(t('No forums defined'), 'Backdrop default forum removed.');
 
     $this->pass('#########################<br />#1 - END test initial configuration @' . (time() - $this->time), '######');
   }
@@ -156,14 +141,6 @@ class ForumAccess11InitialConfigurationTestCase extends ForumAccessBaseTestCase 
  * Default configuration test for the Forum Access module.
  */
 class ForumAccess12DefaultConfigurationTestCase extends ForumAccessBaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => '2. Forum Access Default Configuration',
-      'description' => 'Test access for the default forum configuration.',
-      'group' => 'Forum Access',
-    );
-  }
 
   function testAccess2() {
     $this->setUp2();
@@ -178,6 +155,8 @@ class ForumAccess12DefaultConfigurationTestCase extends ForumAccessBaseTestCase 
       'description' => 'Default settings',
       'parent[0]' => 0,
       'weight' => '0',
+      'forum_access[grants][checkboxes][view][authenticated]' => 'authenticated',
+      'forum_access[grants][checkboxes][create][authenticated]' => 'authenticated',
     );
     $forum = (object) ($edit + array('tid' => 2));
     // Create forum.
@@ -199,14 +178,6 @@ class ForumAccess12DefaultConfigurationTestCase extends ForumAccessBaseTestCase 
  */
 class ForumAccess13ReadOnlyConfigurationTestCase extends ForumAccessBaseTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => '3. Forum Access Read-Only',
-      'description' => 'Test access for the configuration with only View access given.',
-      'group' => 'Forum Access',
-    );
-  }
-
   function testAccess3() {
     $this->createAndCheckForum(3, 'Read-Only', 'All View checkboxes checked', array('view'));
   }
@@ -217,14 +188,6 @@ class ForumAccess13ReadOnlyConfigurationTestCase extends ForumAccessBaseTestCase
  * All-OFF configuration test for the Forum Access module.
  */
 class ForumAccess14AllOffConfigurationTestCase extends ForumAccessBaseTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => '4. Forum Access All-OFF Configuration',
-      'description' => 'Test access for the configuration with all access withheld.',
-      'group' => 'Forum Access',
-    );
-  }
 
   function testAccess4() {
     $this->createAndCheckForum(4, 'All-OFF', 'All checkboxes cleared', array());
@@ -237,14 +200,6 @@ class ForumAccess14AllOffConfigurationTestCase extends ForumAccessBaseTestCase {
  */
 class ForumAccess15AllOnConfigurationTestCase extends ForumAccessBaseTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => '5. Forum Access All-ON Configuration',
-      'description' => 'Test access for the configuration with all access given.',
-      'group' => 'Forum Access',
-    );
-  }
-
   function testAccess5() {
     $this->createAndCheckForum(5, 'All-ON', 'All checkboxes checked', $this->accesses);
   }
@@ -256,18 +211,9 @@ class ForumAccess15AllOnConfigurationTestCase extends ForumAccessBaseTestCase {
  */
 class ForumAccess16NoViewConfigurationTestCase extends ForumAccessBaseTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => '6. Forum Access No-View',
-      'description' => 'Test access for the configuration without View access (blocks all other access!).',
-      'group' => 'Forum Access',
-    );
-  }
-
   function testAccess6() {
     $accesses = $this->accesses;
     array_shift($accesses);
     $this->createAndCheckForum(6, 'No-View', 'All checkboxes checked except View column', $accesses);
   }
 }
-
