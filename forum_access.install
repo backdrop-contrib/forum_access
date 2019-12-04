@@ -156,21 +156,6 @@ function forum_access_disable() {
 /*
  * Implements hook_uninstall().
  */
-/**
- * @todo Please document this function.
- * @see http://drupal.org/node/1354
- */
 function forum_access_uninstall() {
-  config_clear('forum_access.settings', 'forum_access_allowed_comment_edit_administration_elements');
-  config_clear('forum_access.settings', 'forum_access_allowed_comment_links_for_create');
-  config_clear('forum_access.settings', 'forum_access_allowed_comment_links_for_udpate');
-  config_clear('forum_access.settings', 'forum_access_allowed_comment_links_for_delete');
-  config_clear('forum_access.settings', 'forum_access_allowed_node_edit_elements');
-  config_clear('forum_access.settings', 'forum_access_allowed_node_edit_options');
-  config_clear('forum_access.settings', 'forum_access_batch_threshold');
-  config_clear('forum_access.settings', 'forum_access_default_template_tid');
-  config_clear('forum_access.settings', 'forum_access_new_template_tid');
-  config_clear('forum_access.settings', 'forum_access_provide_moderators_template_variable');
-  config_clear('forum_access.settings', 'forum_access_rids');
-  config_clear('forum_access.settings', 'forum_access_update_limit');
+
 }
