@@ -399,6 +399,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $this->assertResponse(200, "^^^ '$forum->name' initial topics.");
 
     foreach ($this->accounts as $key => $account) {
+      cache_flush('cache_entity_taxonomy_term');
       $is_super_user = user_access('bypass node access', $account) || ($account->uid == $this->moderator->uid && !$is_default);
 
       if (!empty($account->uid)) {
@@ -586,7 +587,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
             $this->backdropPost("node/$node->nid/edit", array(
               'title' => $node->title,
             ), t('Save'));
-            $this->assertText($node->title, "Forum topic $node->title has been updated.");
+            $this->assertText($node->title, t('Forum topic !title has been updated.', array('!title' => $node->title)));
           }
 
           // Check whether we can delete the topic.
