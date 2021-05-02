@@ -159,6 +159,13 @@ function forum_access_uninstall() {
 }
 
 /**
+ * Implements hook_update_last_removed().
+ */
+function forum_access_update_last_removed() {
+  return 7002;
+}
+
+/**
  * Drop tid index and add primary key to forum_access table.
  */
 function forum_access_update_1100() {
