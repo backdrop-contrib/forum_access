@@ -4,7 +4,6 @@
     "forum_access_new_template_tid": "novalue",
     "forum_access_update_limit": "20",
     "forum_access_batch_threshold": "20",
-    "forum_access_moderator_rid": "NULL",
     "forum_access_rids": "NULL",
     "forum_access_provide_moderators_template_variable": "FALSE",
     "forum_access_allowed_comment_links_for_create": [

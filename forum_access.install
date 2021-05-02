@@ -167,8 +167,10 @@ function forum_access_update_last_removed() {
 
 /**
  * Drop tid index and add primary key to forum_access table.
+ * Remove unused setting.
  */
 function forum_access_update_1100() {
   db_drop_index('forum_access', 'tid');
   db_add_primary_key('forum_access', array('tid', 'rid'));
+  config_clear('forum_access.settings', 'forum_access_moderator_rid');
 }
