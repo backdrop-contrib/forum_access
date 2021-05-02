@@ -106,10 +106,8 @@ function forum_access_schema() {
         'default' => 0,
       ),
     ),
-    'indexes' => array(
-      'tid' => array('tid'),
-      'rid' => array('rid'),
-    ),
+    'primary key' => array('tid', 'rid'),
+    'indexes' => array('rid' => array('rid')),
     'foreign keys' => array(
       'tid' => array('taxonomy_term_data' => 'tid'),
       'rid' => array('role' => 'rid'),
@@ -158,4 +156,12 @@ function forum_access_disable() {
  */
 function forum_access_uninstall() {
 
+}
+
+/**
+ * Drop tid index and add primary key to forum_access table.
+ */
+function forum_access_update_1100() {
+  db_drop_index('forum_access', 'tid');
+  db_add_primary_key('forum_access', array('tid', 'rid'));
 }
