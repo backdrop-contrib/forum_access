@@ -166,6 +166,44 @@ function forum_access_update_last_removed() {
 }
 
 /**
+ * Move forum_access module settings from variables to config.
+ */
+function forum_access_update_1000() {
+  // Migrate variables to config.
+  $config = config('forum_access.settings');
+  $config->set('forum_access_default_template_tid', update_variable_get('forum_access_default_template_tid', 'novalue'));
+  $config->set('forum_access_new_template_tid', update_variable_get('forum_access_new_template_tid', 'novalue'));
+  $config->set('forum_access_update_limit', update_variable_get('forum_access_update_limit', 20));
+  $config->set('forum_access_batch_threshold', update_variable_get('forum_access_batch_threshold', 20));
+  $config->set('forum_access_rids', update_variable_get('forum_access_rids', NULL));
+  $config->set('forum_access_provide_moderators_template_variable', update_variable_get('forum_access_provide_moderators_template_variable', FALSE));
+  $links_for_create = update_variable_get('forum_access_allowed_comment_links_for_create', array('comment-reply'));
+  $config->set('forum_access_allowed_comment_links_for_create', $links_for_create);
+  $links_for_update = update_variable_get('forum_access_allowed_comment_links_for_update', array('comment-edit', 'comment-approve'));
+  $config->set('forum_access_allowed_comment_links_for_update', $links_for_update);
+  $links_for_delete = update_variable_get('forum_access_allowed_comment_links_for_delete', array('comment-delete'));
+  $config->set('forum_access_allowed_comment_links_for_delete', $links_for_delete);
+  $edit_options = update_variable_get('forum_access_allowed_node_edit_options', array('status', 'sticky', 'subscriptions_notify'));
+  $config->set('forum_access_allowed_node_edit_options', $edit_options);
+  $elements = update_variable_get('forum_access_allowed_comment_edit_administration_elements', array('homepage', 'status', 'subscriptions_notify'));
+  $config->set('forum_access_allowed_comment_edit_administration_elements', $elements);
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('forum_access_default_template_tid');
+  update_variable_del('forum_access_new_template_tid');
+  update_variable_del('forum_access_update_limit');
+  update_variable_del('forum_access_batch_threshold');
+  update_variable_del('forum_access_rids');
+  update_variable_del('forum_access_provide_moderators_template_variable');
+  update_variable_del('forum_access_allowed_comment_links_for_create');
+  update_variable_del('forum_access_allowed_comment_links_for_update');
+  update_variable_del('forum_access_allowed_comment_links_for_delete');
+  update_variable_del('forum_access_allowed_node_edit_options');
+  update_variable_del('forum_access_allowed_comment_edit_administration_elements');
+}
+
+/**
  * Drop tid index and add primary key to forum_access table.
  * Remove unused setting.
  */
