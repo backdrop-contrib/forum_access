@@ -307,7 +307,59 @@ function _forum_access_forum_grants_form(&$form_state, $is_container, $settings)
   }
 
   backdrop_add_css(backdrop_get_path('module', 'forum_access') . '/css/forum_access.css', array('preprocess' => FALSE));
+
+  // Warn if any role has forum_access 'Post' but lacks the core permission.
+  if (!$is_container) {
+    _forum_access_check_create_permission_conflicts($form, $settings['create']);
+  }
+
   return $form;
+}
+
+/**
+ * Adds a warning to the grants form when roles have 'Post' (grant_create)
+ * in Forum Access but lack the core 'create forum content' permission.
+ *
+ * Without the core permission, users in those roles could not create forum
+ * topics on sites that rely solely on core permission checks. Admins should
+ * either grant 'create forum content' to these roles or remove the 'Post'
+ * checkbox for them in Forum Access.
+ *
+ * @param array $form
+ *   The grants form element, modified in place.
+ * @param array $create_rids
+ *   Role IDs that currently have grant_create in Forum Access.
+ */
+function _forum_access_check_create_permission_conflicts(&$form, array $create_rids) {
+  if (empty($create_rids)) {
+    return;
+  }
+  $all_roles = user_roles();
+  $roles_with_core_perm = array_keys(user_roles(FALSE, 'create forum content'));
+  $conflicts = array();
+  foreach ($create_rids as $rid) {
+    if ($rid == BACKDROP_ANONYMOUS_ROLE) {
+      continue; // Anonymous can never create content.
+    }
+    if (!in_array($rid, $roles_with_core_perm) && isset($all_roles[$rid])) {
+      $conflicts[] = check_plain($all_roles[$rid]);
+    }
+  }
+  if (empty($conflicts)) {
+    return;
+  }
+  $perm_link = l(t('create forum content'), 'admin/config/people/permissions', array(
+    'fragment' => 'module-node',
+  ));
+  $form['permission_conflict'] = array(
+    '#type' => 'item',
+    '#markup' => '<div class="messages warning">' .
+      t('The following role(s) have <em>Post</em> access in Forum Access but lack the !perm core permission: %roles. Grant the !perm permission to these roles, or remove the <em>Post</em> checkmark above.', array(
+        '!perm'  => $perm_link,
+        '%roles' => implode(', ', $conflicts),
+      )) . '</div>',
+    '#weight' => 9,
+  );
 }
 
 function _forum_access_process_grant_form_checkboxes($element, &$form_state, $form_state_complete) {
@@ -650,6 +702,28 @@ function _forum_access_form_submit($form, &$form_state) {
   $tr = 't';
   $link = l($tr('edit'), 'admin/structure/forum/edit/forum/' . $tid);
   watchdog('access', 'Changed grants for %forum forum.', array('%forum' => $form_state['values']['name']), WATCHDOG_NOTICE, $link);
+
+  // Warn the admin if any saved 'Post' grants conflict with core permissions.
+  if ($form_state['values']['form_id'] != 'forum_form_container') {
+    $saved_create_rids = array_keys(array_filter($access['create']));
+    $all_roles = user_roles();
+    $roles_with_core_perm = array_keys(user_roles(FALSE, 'create forum content'));
+    $conflicts = array();
+    foreach ($saved_create_rids as $rid) {
+      if ($rid != BACKDROP_ANONYMOUS_ROLE && !in_array($rid, $roles_with_core_perm) && isset($all_roles[$rid])) {
+        $conflicts[] = check_plain($all_roles[$rid]);
+      }
+    }
+    if (!empty($conflicts)) {
+      $perm_link = l(t('create forum content'), 'admin/config/people/permissions', array(
+        'fragment' => 'module-node',
+      ));
+      backdrop_set_message(t('Warning: The following role(s) have <em>Post</em> access in Forum Access but lack the !perm core permission: %roles. Grant the !perm permission to these roles so that people in those roles can post.', array(
+        '!perm'  => $perm_link,
+        '%roles' => implode(', ', $conflicts),
+      )), 'warning');
+    }
+  }
 
   if ($form_state['values']['form_id'] != 'forum_form_container') {
     if ($is_new) {

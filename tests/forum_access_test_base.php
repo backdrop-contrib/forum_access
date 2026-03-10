@@ -160,7 +160,7 @@ class ForumAccessBaseTestCase extends ForumTestCase {
 
     // Create our roles.
     $this->admin_rid = 'administrator';
-    $this->webmaster_rid = $this->backdropCreateRole(array('administer blocks', 'administer forums', 'administer nodes', 'administer comments', 'administer menu', 'administer taxonomy', 'create forum content', 'access content overview', 'access administration pages', 'view revisions', 'revert revisions', 'delete revisions', 'administer url aliases'), '11 webmaster');
+    $this->webmaster_rid = $this->backdropCreateRole(array('administer blocks', 'administer forums', 'administer nodes', 'administer comments', 'administer comment settings', 'administer menu', 'administer taxonomy', 'create forum content', 'access content overview', 'access administration pages', 'view revisions', 'revert revisions', 'delete revisions', 'administer url aliases'), '11 webmaster');
     $this->forum_admin_rid = $this->backdropCreateRole(array('administer forums', 'create forum content', 'edit any forum content', 'delete any forum content', /* 'access content overview', 'access administration pages', */), '12 forum admin');
     $this->edndel_any_content_rid = $this->backdropCreateRole(array('create forum content', 'edit any forum content', 'delete any forum content', 'view own unpublished content'), '13 edndel any content');
     $this->edndel_own_content_rid = $this->backdropCreateRole(array('create forum content', 'edit own forum content', 'delete own forum content', 'edit own comments'), '14 edndel own content');
@@ -171,6 +171,17 @@ class ForumAccessBaseTestCase extends ForumTestCase {
     $this->create_content_rid = $this->backdropCreateRole(array('create forum content'), '19 create content');
     $this->anon_rid = BACKDROP_ANONYMOUS_ROLE;
     $this->auth_rid = BACKDROP_AUTHENTICATED_ROLE;
+
+    // Grant 'post comments' to authenticated users so comment forms are
+    // accessible in tests. Forum topics require comments to be functional.
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('post comments'));
+
+    // Ensure comments are enabled on the forum content type. In a fresh test
+    // environment the forum node type is created without comment_enabled.
+    $forum_type = node_type_get_type('forum');
+    $forum_type->settings['comment_enabled'] = 1;
+    $forum_type->settings['comment_default'] = COMMENT_NODE_OPEN;
+    node_type_save($forum_type);
 
     // Create our users.
     $this->admin_user = $this->backdropCreateNamedUser('10_Administrator', array($this->admin_rid));
@@ -338,17 +349,32 @@ class ForumAccessBaseTestCase extends ForumTestCase {
   }
 
   protected function createForumTopicWithTitle($forum, $title) {
-    $node = $this->createForumTopic((array) $forum);
-    $node = node_load($node->nid);
-    $node->title = $title;
-    $node->shadow = FALSE;
+    // Create the node programmatically rather than via createForumTopic(),
+    // which bundles in view-access assertions (lines 498-500 of forum.test)
+    // that fail in restricted forums like All-OFF and No-View where even the
+    // topic creator cannot access the node through the frontend.
+    $langcode = LANGUAGE_NONE;
+    $node = entity_create('node', array(
+      'type'    => 'forum',
+      'title'   => $title,
+      'uid'     => $this->loggedInUser->uid,
+      'status'  => 1,
+      'comment' => COMMENT_NODE_OPEN,
+      'shadow'  => FALSE,
+      'taxonomy_forums' => array(
+        $langcode => array(array('tid' => $forum->tid)),
+      ),
+      'body' => array(
+        $langcode => array(array('value' => 'Test body for ' . $title, 'format' => 'plain_text')),
+      ),
+    ));
     node_save($node);
     return $node;
   }
 
   protected function createForumCommentWithText($node, $text) {
     static $cid = 0;
-    $this->backdropPost("node/$node->nid", array(
+    $this->backdropPost('comment/reply/' . $node->nid, array(
       'comment_body[' . LANGUAGE_NONE . '][0][value]' => $text,
     ), t('Save'));
     $this->assertResponse(200);
