@@ -252,6 +252,9 @@ class ForumAccess16NoViewConfigurationTestCase extends ForumAccessBaseTestCase {
  */
 class ForumAccess30MultiForumTestCase extends BackdropWebTestCase {
 
+  protected $admin;
+  protected $viewer;
+
   function setUp() {
     parent::setUp(array('taxonomy', 'comment', 'forum', 'acl', 'chain_menu_access', 'forum_access'));
 
@@ -363,6 +366,8 @@ class ForumAccess30MultiForumTestCase extends BackdropWebTestCase {
  */
 class ForumAccess31AnonymousAccessTestCase extends BackdropWebTestCase {
 
+  protected $admin;
+
   function setUp() {
     parent::setUp(array('taxonomy', 'comment', 'forum', 'acl', 'chain_menu_access', 'forum_access'));
 
@@ -462,6 +467,9 @@ class ForumAccess31AnonymousAccessTestCase extends BackdropWebTestCase {
  */
 class ForumAccess32TopicMoveTestCase extends BackdropWebTestCase {
 
+  protected $admin;
+  protected $viewer;
+
   function setUp() {
     parent::setUp(array('taxonomy', 'comment', 'forum', 'acl', 'chain_menu_access', 'forum_access'));
 
@@ -555,6 +563,8 @@ class ForumAccess32TopicMoveTestCase extends BackdropWebTestCase {
  * creating forum topics.
  */
 class ForumAccess20PermissionConflictWarningTestCase extends BackdropWebTestCase {
+
+  protected $admin_user;
 
   function setUp() {
     parent::setUp(array('taxonomy', 'comment', 'forum', 'acl', 'chain_menu_access', 'forum_access'));
