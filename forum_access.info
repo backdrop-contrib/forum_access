@@ -9,3 +9,4 @@ type = module
 
 configure = admin/structure/forum
 
+dependencies[] = forum (>=1.0.3)
