@@ -316,9 +316,8 @@ function forum_access_query_term_access_alter(QueryAlterableInterface $query) {
     $op = 'view';
   }
 
-  // If $account can bypass node access, we let them administer the full forum
-  // structure and see the nodes, i.e. we don't restrict the query.
-  if (user_access('bypass node access', $account) && (strpos(current_path(), 'admin/structure/forum') === 0 || strpos(current_path(), 'node/') === 0)) {
+  // If $account can bypass node access, they see all forums unconditionally.
+  if (user_access('bypass node access', $account)) {
     return;
   }
 
@@ -337,25 +336,13 @@ function forum_access_query_term_access_alter(QueryAlterableInterface $query) {
       // The node_access table has the access grants for any given node.
       $access_alias = $query->leftJoin('forum_access', 'fa', '%alias.tid = ' . $talias . '.tid');
       $acl_alias = $query->leftJoin('acl', 'acl', "%alias.number = $talias.tid AND %alias.module = 'forum_access'");
-      if (user_access('bypass node access', $account)) {
-        // If $account can bypass node access, we allow access if any role or
-        // account has access.
-        $aclu_alias = $query->leftJoin('acl_user', 'aclu', "%alias.acl_id = $acl_alias.acl_id");
-        $query->condition(db_or()
-          ->isNull("$access_alias.rid")
-          ->condition("$access_alias.grant_$op", 1, '>=')
-          ->isNotNull("$aclu_alias.uid")
-        );
-      }
-      else {
-        $aclu_alias = $query->leftJoin('acl_user', 'aclu', "%alias.acl_id = $acl_alias.acl_id AND %alias.uid = $account->uid");
-        $query->condition(db_or()
-          ->isNull("$access_alias.rid")
-          ->condition(db_and()
-            ->condition("$access_alias.rid", $rids, 'IN')
-            ->condition("$access_alias.grant_$op", 1, '>='))
-          ->condition("$aclu_alias.uid", $account->uid));
-      }
+      $aclu_alias = $query->leftJoin('acl_user', 'aclu', "%alias.acl_id = $acl_alias.acl_id AND %alias.uid = $account->uid");
+      $query->condition(db_or()
+        ->isNull("$access_alias.rid")
+        ->condition(db_and()
+          ->condition("$access_alias.rid", $rids, 'IN')
+          ->condition("$access_alias.grant_$op", 1, '>='))
+        ->condition("$aclu_alias.uid", $account->uid));
     }
   }
 }
@@ -420,6 +407,10 @@ function forum_access_node_insert($node) {
     if ($tid = _forum_access_get_tid($node)) {
       $acl_id = _forum_access_get_acl($tid);
       acl_node_add_acl($node->nid, $acl_id, 1, 1, 1);
+      // Backdrop calls node_access_acquire_grants() in postSave(), which runs
+      // before hook_node_insert fires. Re-acquire grants now so the moderator
+      // ACL records (written above) are actually stored in {node_access}.
+      node_access_acquire_grants($node);
 
       /*
        if (isset($old_tid) && module_exists('nodecomment')) {
@@ -500,7 +491,12 @@ function forum_access_menu_get_item_alter(&$router_item, $path, $original_map) {
         }
         break;
       case 'node':
-        if (isset($original_map[1]) && is_numeric($nid = $original_map[1]) && ($node = node_load($nid)) && ($tid = _forum_access_get_tid($node))) {
+        if (isset($original_map[1]) && $original_map[1] === 'add'
+            && isset($original_map[3]) && is_numeric($original_map[3])) {
+          // Handle node/add/[type]/[tid] (e.g. node/add/forum/5).
+          forum_access_current_tid($original_map[3]);
+        }
+        elseif (isset($original_map[1]) && is_numeric($nid = $original_map[1]) && ($node = node_load($nid)) && ($tid = _forum_access_get_tid($node))) {
           forum_access_current_tid($tid);
         }
         break;
@@ -595,6 +591,11 @@ function forum_access_node_access($node, $op, $account) {
       }
       if (!forum_access_access('create', $tid, $account)) {
         return $cache[$account->uid][$op][$tid] = NODE_ACCESS_DENY;
+      }
+      // Only assert ALLOW when we know the specific forum AND the user holds
+      // the global 'create forum content' permission; otherwise defer to core.
+      if ($tid != 0 && user_access('create forum content', $account)) {
+        return $cache[$account->uid][$op][$tid] = NODE_ACCESS_ALLOW;
       }
       return $cache[$account->uid][$op][$tid] = NODE_ACCESS_IGNORE;
     }

@@ -40,3 +40,27 @@ description = Test access for the configuration without View access (blocks all 
 group = Forum Access
 file = forum_access.test
 
+[ForumAccess20PermissionConflictWarningTestCase]
+name = 7. Forum Access Permission Conflict Warning
+description = Verifies that the forum admin form warns when a role has Post access in Forum Access but lacks the core 'create forum content' permission.
+group = Forum Access
+file = forum_access.test
+
+[ForumAccess30MultiForumTestCase]
+name = 8. Forum Access Multi-Forum Isolation
+description = Verifies that access grants are independent per forum: a user blocked in one forum can still access another.
+group = Forum Access
+file = forum_access.test
+
+[ForumAccess31AnonymousAccessTestCase]
+name = 9. Forum Access Anonymous User Access
+description = Verifies that anonymous users can view public forums but are blocked from private ones, and cannot create topics anywhere.
+group = Forum Access
+file = forum_access.test
+
+[ForumAccess32TopicMoveTestCase]
+name = 10. Forum Access Topic Move
+description = Verifies that node_access grants are correctly rebuilt when a topic is moved from an open forum to a restricted one.
+group = Forum Access
+file = forum_access.test
+
